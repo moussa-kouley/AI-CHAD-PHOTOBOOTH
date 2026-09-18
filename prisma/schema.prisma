@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime     @default(now())
+  memberships  Membership[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id          String        @id @default(cuid())
+  name        String
+  plan        String        @default("free")
+  credits     Int           @default(10)
+  locale      String        @default("en")
+  createdAt   DateTime      @default(now())
+  memberships Membership[]
+  booths      Photobooth[]
+  prompts     Prompt[]
+  ledger      CreditLedger[]
+
+  @@map("workspaces")
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  role        String    @default("owner")
+  userId      String
+  workspaceId String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@map("memberships")
+}
+
+model Photobooth {
+  id              String       @id @default(cuid())
+  workspaceId     String
+  name            String
+  slug            String       @unique
+  publicToken     String       @unique
+  workflow        String       @default("live_edit")
+  aspectRatio     String       @default("9:16")
+  promptMode      String       @default("user_chooses")
+  selectedPrompts String       @default("[]")
+  deliveryMode    String       @default("download")
+  videoEnabled    Boolean      @default(true)
+  isActive        Boolean      @default(true)
+  brand           String       @default("{}")
+  gdpr            String       @default("{}")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sessions        Session[]
+  generations     Generation[]
+
+  @@map("photobooths")
+}
+
+model Prompt {
+  id          String    @id @default(cuid())
+  workspaceId String?
+  scope       String    @default("system")
+  category    String
+  title       String
+  body        String
+  videoHint   String    @default("Subtle camera push-in, keep face identity, natural motion, no text overlay")
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("prompts")
+}
+
+model Session {
+  id            String       @id @default(cuid())
+  boothId       String
+  shareToken    String       @unique
+  status        String       @default("captured")
+  consent       Boolean      @default(false)
+  email         String?
+  sourcePath    String?
+  offlineId     String?      @unique
+  createdAt     DateTime     @default(now())
+  booth         Photobooth   @relation(fields: [boothId], references: [id], onDelete: Cascade)
+  generations   Generation[]
+  jobs          Job[]
+
+  @@map("sessions")
+}
+
+model Generation {
+  id           String     @id @default(cuid())
+  boothId      String
+  sessionId    String
+  kind         String
+  status       String     @default("queued")
+  promptTitle  String
+  promptBody   String
+  inputPath    String?
+  outputPath   String?
+  brandedPath  String?
+  provider     String     @default("alibaba")
+  creditsUsed  Int        @default(0)
+  error        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  booth        Photobooth @relation(fields: [boothId], references: [id], onDelete: Cascade)
+  session      Session    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("generations")
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  sessionId   String
+  type        String
+  payload     String
+  status      String    @default("pending")
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5)
+  runAfter    DateTime  @default(now())
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  session     Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([status, runAfter])
+  @@map("jobs")
+}
+
+model CreditLedger {
+  id          String    @id @default(cuid())
+  workspaceId String
+  delta       Int
+  reason      String
+  refId       String?
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("credit_ledger")
+}

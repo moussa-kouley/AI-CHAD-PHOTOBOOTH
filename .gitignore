@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+dist
+.DS_Store
+*.db
+*.db-journal
+.env
+.env.local
+.env.*.local
+storage/uploads
+storage/outputs
+coverage
+tsconfig.tsbuildinfo
+supabase/.temp
