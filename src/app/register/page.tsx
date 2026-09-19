@@ -2,44 +2,56 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BrandMark } from "@/components/brand-mark";
 import { readApiJson } from "@/lib/api-json";
 import { studio } from "@/lib/studio-copy";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    fetch("/api/me")
+    router.prefetch("/app");
+    const control = new AbortController();
+    fetch("/api/me", { signal: control.signal })
       .then((response) => readApiJson<{ user?: unknown }>(response))
       .then((data) => {
-        if (data.user) window.location.href = "/app";
+        if (data.user) router.replace("/app");
       })
       .catch(() => undefined);
-  }, []);
+    return () => control.abort();
+  }, [router]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
+    setError("");
     const form = new FormData(event.currentTarget);
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.get("name"),
-        email: form.get("email"),
-        password: form.get("password"),
-        workspaceName: form.get("workspaceName"),
-      }),
-    });
-    const data = await readApiJson<{ error?: string }>(response);
-    setPending(false);
-    if (!response.ok) {
-      setError(typeof data.error === "string" ? data.error : studio.auth.registerFail);
-      return;
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.get("name"),
+          email: form.get("email"),
+          password: form.get("password"),
+          workspaceName: form.get("workspaceName"),
+        }),
+      });
+      const data = await readApiJson<{ error?: string }>(response);
+      if (!response.ok) {
+        setError(typeof data.error === "string" ? data.error : studio.auth.registerFail);
+        setPending(false);
+        return;
+      }
+      router.replace("/app");
+      router.refresh();
+    } catch {
+      setError(studio.auth.registerFail);
+      setPending(false);
     }
-    window.location.href = "/app";
   }
 
   return (

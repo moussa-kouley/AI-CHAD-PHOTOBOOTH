@@ -1,6 +1,12 @@
 import { prisma } from "./db";
 import { PROMPT_RENAMES, SYSTEM_PROMPTS } from "./prompts";
 
+export async function ensureSystemPromptsIfEmpty() {
+  const count = await prisma.prompt.count({ where: { scope: "system" } });
+  if (count > 0) return;
+  await ensureSystemPrompts();
+}
+
 export async function ensureSystemPrompts() {
   const existing = await prisma.prompt.findMany({ where: { scope: "system" } });
   const byTitle = new Map(existing.map((prompt) => [prompt.title, prompt]));

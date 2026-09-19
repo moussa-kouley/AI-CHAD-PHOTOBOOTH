@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { studio } from "@/lib/studio-copy";
+import { readApiJson } from "@/lib/api-json";
 
 type Booth = {
   id: string;
@@ -14,24 +15,31 @@ type Booth = {
 };
 
 export default function DashboardPage() {
-  const [booths, setBooths] = useState<Booth[]>([]);
+  const [booths, setBooths] = useState<Booth[] | null>(null);
   const [credits, setCredits] = useState(0);
   const [workspaceName, setWorkspaceName] = useState("");
   const [error, setError] = useState("");
   const [demoMode, setDemoMode] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   async function load() {
-    const [workspace, me] = await Promise.all([fetch("/api/booths"), fetch("/api/me")]);
-    const data = await workspace.json();
-    const profile = await me.json();
-    if (!workspace.ok) {
-      setError(data.error || studio.floor.loadFail);
+    const response = await fetch("/api/booths");
+    const data = await readApiJson<{
+      booths?: Booth[];
+      credits?: number;
+      workspaceName?: string;
+      demoMode?: boolean;
+      error?: string;
+    }>(response);
+    if (!response.ok) {
+      setError(typeof data.error === "string" ? data.error : studio.floor.loadFail);
+      setBooths([]);
       return;
     }
-    setBooths(data.booths);
-    setCredits(data.credits);
-    setWorkspaceName(data.workspaceName || profile.workspace?.name || "");
-    setDemoMode(Boolean(profile.demoMode));
+    setBooths(data.booths || []);
+    setCredits(data.credits || 0);
+    setWorkspaceName(data.workspaceName || "");
+    setDemoMode(Boolean(data.demoMode));
   }
 
   useEffect(() => {
@@ -43,25 +51,32 @@ export default function DashboardPage() {
     const formEl = event.currentTarget;
     const form = new FormData(formEl);
     setError("");
-    const response = await fetch("/api/booths", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.get("name"),
-        brand: { eventName: form.get("name"), subtitle: studio.floor.defaultSubtitle, primary: "#c8a25a", frame: "strip" },
-      }),
-    });
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({ error: "" }));
-      setError(data.error || studio.floor.createFail);
-      return;
+    setCreating(true);
+    try {
+      const response = await fetch("/api/booths", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.get("name"),
+          brand: { eventName: form.get("name"), subtitle: studio.floor.defaultSubtitle, primary: "#c8a25a", frame: "strip" },
+        }),
+      });
+      if (!response.ok) {
+        const data = await readApiJson<{ error?: string }>(response);
+        setError(typeof data.error === "string" ? data.error : studio.floor.createFail);
+        return;
+      }
+      formEl.reset();
+      await load();
+    } finally {
+      setCreating(false);
     }
-    formEl.reset();
-    await load();
   }
 
-  const live = booths.filter((item) => item.isActive);
-  const rest = booths.filter((item) => !item.isActive);
+  const list = booths || [];
+  const live = list.filter((item) => item.isActive);
+  const rest = list.filter((item) => !item.isActive);
+  const loading = booths === null;
 
   return (
     <main className="floor-layout">
@@ -76,7 +91,7 @@ export default function DashboardPage() {
             <span>{studio.floor.newBooth}</span>
             <input className="field" name="name" placeholder={studio.floor.tonightName} required minLength={2} />
           </label>
-          <button className="btn btn-gold" type="submit">{studio.floor.open}</button>
+          <button className="btn btn-gold" type="submit" disabled={creating}>{creating ? "…" : studio.floor.open}</button>
         </form>
       </section>
       <section>
@@ -85,25 +100,31 @@ export default function DashboardPage() {
           <Link href="/app/credits" className="text-sm text-[#c8a25a]" title={studio.floor.recorded(credits)}>{studio.floor.portraitsOpen}</Link>
         </div>
         <div className="booth-grid mt-5">
-          {booths.length === 0 ? (
+          {loading ? (
+            <>
+              <div className="floor-skel" />
+              <div className="floor-skel" />
+            </>
+          ) : list.length === 0 ? (
             <article className="booth-card">
               <p className="eyebrow">{studio.floor.empty}</p>
               <h2>{studio.floor.noBooth}</h2>
               <p>{studio.floor.emptyLead}</p>
             </article>
-          ) : null}
-          {[...live, ...rest].map((booth) => (
-            <article key={booth.id} className="booth-card" data-live={booth.isActive}>
-              <p className="eyebrow">{booth.isActive ? studio.floor.live : studio.floor.dark}</p>
-              <h2>{booth.name}</h2>
-              <p>{studio.floor.guestsPrints(booth._count?.sessions || 0, booth._count?.generations || 0)}</p>
-              <div className="booth-actions">
-                <Link className="btn btn-gold" href={`/app/booths/${booth.id}`}>{studio.floor.dress}</Link>
-                <Link className="btn btn-ghost" href={`/kiosk/${booth.publicToken}`}>{studio.floor.kiosk}</Link>
-                <Link className="btn btn-quiet" href={`/g/${booth.publicToken}`}>{studio.floor.wall}</Link>
-              </div>
-            </article>
-          ))}
+          ) : (
+            [...live, ...rest].map((booth) => (
+              <article key={booth.id} className="booth-card" data-live={booth.isActive}>
+                <p className="eyebrow">{booth.isActive ? studio.floor.live : studio.floor.dark}</p>
+                <h2>{booth.name}</h2>
+                <p>{studio.floor.guestsPrints(booth._count?.sessions || 0, booth._count?.generations || 0)}</p>
+                <div className="booth-actions">
+                  <Link className="btn btn-gold" href={`/app/booths/${booth.id}`}>{studio.floor.dress}</Link>
+                  <Link className="btn btn-ghost" prefetch href={`/kiosk/${booth.publicToken}`}>{studio.floor.kiosk}</Link>
+                  <Link className="btn btn-quiet" href={`/g/${booth.publicToken}`}>{studio.floor.wall}</Link>
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </section>
     </main>

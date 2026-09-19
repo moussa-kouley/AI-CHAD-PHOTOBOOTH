@@ -13,6 +13,7 @@ import { snapPortrait } from "@/lib/snap";
 import { useBoothLens } from "@/lib/use-booth-lens";
 import { cameraConstraints } from "@/lib/camera";
 import { attractCovers } from "@/lib/theme-look";
+import { readApiJson } from "@/lib/api-json";
 
 type Prompt = { id: string; title: string; category: string; scope?: string; body?: string };
 type Booth = {
@@ -87,29 +88,31 @@ export default function KioskPage() {
   useEffect(() => {
     fetch(`/api/booths/public/${token}`)
       .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || copy.boothDown.fr);
+        const data = await readApiJson<{ booth?: Booth; prompts?: Prompt[]; error?: string }>(response);
+        if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : copy.boothDown.fr);
+        if (!data.booth) throw new Error(copy.boothDown.fr);
         setBooth(data.booth);
-        setPrompts(data.prompts);
-        setSelected(data.booth.promptMode === "automatic" ? data.prompts.slice(0, 1).map((item: Prompt) => item.id) : []);
+        setPrompts(data.prompts || []);
+        setSelected(data.booth.promptMode === "automatic" ? (data.prompts || []).slice(0, 1).map((item) => item.id) : []);
         setWantVideo(false);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
     fetch("/api/me", { credentials: "same-origin" })
-      .then((response) => response.json())
+      .then((response) => readApiJson<{ user?: unknown }>(response))
       .then((data) => setOperator(Boolean(data.user)))
       .catch(() => setOperator(false));
   }, [token]);
 
   useEffect(() => {
+    if (!askLens) return;
     const origin = window.location.origin;
     QRCode.toDataURL(`${origin}/kiosk/${token}/lens`, {
       width: 192,
       margin: 1,
       color: { dark: "#111111", light: "#ffffff" },
     }).then(setLensQr);
-  }, [token]);
+  }, [token, askLens]);
 
   useEffect(() => {
     let release: (() => void) | undefined;
@@ -412,6 +415,9 @@ export default function KioskPage() {
                   alt=""
                   className="attract-still"
                   data-on={index === still % Math.max(covers.length, 1)}
+                  loading={index < 2 ? "eager" : "lazy"}
+                  decoding="async"
+                  fetchPriority={index === 0 ? "high" : "low"}
                 />
               ) : null,
             )}

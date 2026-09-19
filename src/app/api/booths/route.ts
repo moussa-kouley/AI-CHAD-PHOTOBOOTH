@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
 import { boothSchema } from "@/lib/validators";
 import { jsonError } from "@/lib/errors";
+import { hasAlibabaCredentials } from "@/lib/env";
 
 export async function GET() {
   try {
@@ -18,6 +19,7 @@ export async function GET() {
       credits: workspace.credits,
       plan: workspace.plan,
       workspaceName: workspace.name,
+      demoMode: !hasAlibabaCredentials(),
     });
   } catch (error) {
     return jsonError(error);

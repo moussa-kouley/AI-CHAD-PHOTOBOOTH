@@ -8,7 +8,7 @@ export const WAIT_QUOTES = [
 export function estimateWaitSeconds(remainingLooks: number) {
   const looks = Math.max(1, remainingLooks);
   // Looks run in parallel on wan2.7-image at 720×1280. Guest wait is first-photo time.
-  return Math.min(32, 22 + (looks - 1) * 2);
+  return Math.min(18, 12 + (looks - 1) * 2);
 }
 
 export function formatWait(seconds: number) {

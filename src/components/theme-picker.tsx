@@ -127,7 +127,7 @@ export function ThemePicker({ prompts, selected, onToggle, onRemove, focus, max,
                   onToggle(prompt.id);
                 }}
               >
-                {look.cover ? <img src={look.cover} alt="" /> : <span className="theme-wash" style={{ background: look.wash }} />}
+                {look.cover ? <img src={look.cover} alt="" loading="lazy" decoding="async" /> : <span className="theme-wash" style={{ background: look.wash }} />}
                 <span className="theme-motif" aria-hidden />
                 <span className="theme-veil" />
                 <span className="theme-name">

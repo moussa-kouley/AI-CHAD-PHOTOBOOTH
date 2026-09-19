@@ -4,6 +4,9 @@ import { RegisterServiceWorker } from "@/components/register-sw";
 import { BRAND } from "@/lib/brand";
 import "./globals.css";
 
+export const preferredRegion = ["dub1", "lhr1", "cdg1"];
+export const runtime = "nodejs";
+
 const display = localFont({
   src: "./fonts/instrument-serif-latin-400-normal.woff2",
   variable: "--font-display",
@@ -77,7 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr">
       <body className={`${display.variable} ${sans.variable} antialiased`} style={{ fontFamily: 'var(--font-sans), "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif' }}>
         <div className="app-backdrop" aria-hidden="true">
-          <img src="/assets/africa-future-backdrop.webp" alt="" fetchPriority="high" decoding="async" />
+          <img src="/assets/africa-future-backdrop.webp" alt="" decoding="async" fetchPriority="low" />
         </div>
         <RegisterServiceWorker />
         <div className="app-stage">{children}</div>

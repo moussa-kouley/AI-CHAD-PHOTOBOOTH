@@ -11,6 +11,8 @@ import { openFramedImage, saveFramedImage, shareFramedImage } from "@/lib/keep-f
 import { FILM_FILENAME, SOCIAL_FILENAME } from "@/lib/social";
 import { BRAND } from "@/lib/brand";
 import { useSwipe } from "@/lib/swipe";
+import { readApiJson } from "@/lib/api-json";
+import { BootScreen } from "@/components/boot-screen";
 
 type Generation = {
   id: string;
@@ -63,14 +65,14 @@ export default function SharePage() {
     let cancelled = false;
     async function poll() {
       const response = await fetch(`/api/sessions/${token}`);
-      const data = await response.json();
+      const data = await readApiJson<{ session?: Session; error?: string }>(response);
       if (!response.ok) {
-        setError(data.error || copy.expired.fr);
+        setError(typeof data.error === "string" ? data.error : copy.expired.fr);
         return;
       }
-      if (!cancelled) setSession(data.session);
-      const pending = (data.session.generations as Generation[]).some((item) => item.status === "queued" || item.status === "running");
-      if (pending && !cancelled) window.setTimeout(() => void poll(), 1200);
+      if (!cancelled && data.session) setSession(data.session);
+      const pending = (data.session?.generations || []).some((item) => item.status === "queued" || item.status === "running");
+      if (pending && !cancelled) window.setTimeout(() => void poll(), 2000);
     }
     void poll();
     return () => {
@@ -165,6 +167,10 @@ export default function SharePage() {
   }
 
   const waiting = Boolean(session) && !current?.image && !current?.error;
+
+  if (!session && !error) {
+    return <BootScreen label="Portrait…" />;
+  }
 
   return (
     <main className="souvenir mx-auto min-h-dvh max-w-lg pb-36" data-desk={desk}>
