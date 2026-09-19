@@ -3,7 +3,7 @@ import { z } from "zod";
 const schema = z.object({
   DATABASE_URL: z.string().min(1),
   DIRECT_URL: z.string().min(1).optional(),
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional().default(""),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().optional().default(""),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional().default(""),
   APP_URL: z.string().url().default("http://localhost:3000"),
@@ -18,22 +18,58 @@ const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 
-export const env = schema.parse({
-  DATABASE_URL: process.env.DATABASE_URL,
-  DIRECT_URL: process.env.DIRECT_URL || process.env.DATABASE_URL,
-  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  APP_URL: process.env.APP_URL,
-  AUTH_SECRET: process.env.AUTH_SECRET,
-  DASHSCOPE_API_KEY: process.env.DASHSCOPE_API_KEY,
-  DASHSCOPE_WORKSPACE_ID: process.env.DASHSCOPE_WORKSPACE_ID,
-  DASHSCOPE_BASE_URL: process.env.DASHSCOPE_BASE_URL,
-  WAN_IMAGE_MODEL: process.env.WAN_IMAGE_MODEL,
-  WAN_VIDEO_MODEL: process.env.WAN_VIDEO_MODEL,
-  RATE_LIMIT_PER_MINUTE: process.env.RATE_LIMIT_PER_MINUTE,
-  CRON_SECRET: process.env.CRON_SECRET,
-  NODE_ENV: process.env.NODE_ENV,
+export type Env = z.infer<typeof schema>;
+
+function blank(value: string | undefined) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function isProductionBuild() {
+  return (
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    (process.env.VERCEL === "1" && process.env.CI === "1")
+  );
+}
+
+function loadEnv(): Env {
+  const databaseUrl = blank(process.env.DATABASE_URL);
+  const building = isProductionBuild();
+
+  return schema.parse({
+    DATABASE_URL:
+      databaseUrl ||
+      (building ? "postgresql://build:build@127.0.0.1:5432/build" : databaseUrl),
+    DIRECT_URL: blank(process.env.DIRECT_URL) || databaseUrl,
+    NEXT_PUBLIC_SUPABASE_URL: blank(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: blank(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY),
+    SUPABASE_SERVICE_ROLE_KEY: blank(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    APP_URL: blank(process.env.APP_URL) || (building ? "https://build.local" : undefined),
+    AUTH_SECRET:
+      blank(process.env.AUTH_SECRET) ||
+      (building ? "vercel-build-placeholder-secret-32ch" : undefined),
+    DASHSCOPE_API_KEY: blank(process.env.DASHSCOPE_API_KEY),
+    DASHSCOPE_WORKSPACE_ID: blank(process.env.DASHSCOPE_WORKSPACE_ID),
+    DASHSCOPE_BASE_URL: blank(process.env.DASHSCOPE_BASE_URL),
+    WAN_IMAGE_MODEL: blank(process.env.WAN_IMAGE_MODEL),
+    WAN_VIDEO_MODEL: blank(process.env.WAN_VIDEO_MODEL),
+    RATE_LIMIT_PER_MINUTE: blank(process.env.RATE_LIMIT_PER_MINUTE),
+    CRON_SECRET: blank(process.env.CRON_SECRET),
+    NODE_ENV: blank(process.env.NODE_ENV),
+  });
+}
+
+let cached: Env | undefined;
+
+export function getEnv() {
+  if (!cached) cached = loadEnv();
+  return cached;
+}
+
+export const env: Env = new Proxy({} as Env, {
+  get(_target, prop) {
+    return getEnv()[prop as keyof Env];
+  },
 });
 
 export function dashscopeBaseUrl() {
