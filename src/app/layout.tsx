@@ -40,10 +40,11 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: BRAND.crest, type: "image/png", sizes: "512x512" },
+      { url: BRAND.crest, type: "image/svg+xml" },
       { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/brand/favicon-64.png", type: "image/png", sizes: "64x64" },
     ],
-    apple: [{ url: BRAND.crest, sizes: "180x180" }],
+    apple: [{ url: BRAND.crestRaster, sizes: "180x180" }],
   },
   openGraph: {
     title: BRAND.fr,
@@ -51,13 +52,13 @@ export const metadata: Metadata = {
     locale: "fr_TD",
     type: "website",
     siteName: BRAND.fr,
-    images: [{ url: BRAND.crest, width: 1024, height: 1024, alt: BRAND.fr }],
+    images: [{ url: BRAND.crestRaster, width: 512, height: 512, alt: BRAND.fr }],
   },
   twitter: {
     card: "summary",
     title: BRAND.fr,
     description: BRAND.description,
-    images: [BRAND.crest],
+    images: [BRAND.crestRaster],
   },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: BRAND.short },
   formatDetection: { telephone: false },

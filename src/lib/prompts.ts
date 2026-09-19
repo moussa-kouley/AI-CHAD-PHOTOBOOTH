@@ -28,7 +28,7 @@ const PRESENCE =
   "Hero lighting: they are the most magnetic guest in the picture, chin easy, eyes alive, wardrobe catching the key. Not a passport photo, not amateur flash.";
 
 const TCHAD_PLACE =
-  "The background is Tchad / N’Djamena — laterite, Sahel dusk, civic bronze, Place de la Nation pylons or a near-future Chadian capital street. African and futuristic: hologram light, climate-smart glass, XR overlay. Not Europe, not a generic Gulf skyline. Guests keep their real Chadian or original faces and ethnicity.";
+  "The place is Tchad: N’Djamena civic bronze, Place de la Nation pylons, laterite, Sahel dusk, terracotta vaults, a near-future Chadian street. Chadian people stay Chadian — same faces, same skin, same ethnicity, same age. Futuristic overlay only as hologram gold light, climate-smart glass, unreadable XR glyphs. Not Europe, not a generic Gulf or Dubai skyline, not NASA chrome. IDENTITY LOCK on every guest.";
 
 const FACE_CLEAR =
   "Any visor, headset or glasses is a slim prop around the same face. Eyes, brows, nose, mouth and skin stay fully visible in clear beauty-light, with catchlights. Do not black out the visor. Do not replace the face with a screen, HUD, mask or helmet shell.";
@@ -115,7 +115,7 @@ export const SYSTEM_PROMPTS = [
   {
     category: "Horizon",
     title: "Arrival",
-    body: `${CLEAN} ${PRESENCE} They now stand at the head of a terracotta silk carpet in a civic hall of timber, brass and bronze-glass. Dusk through a vast window. Honour attendants far behind, never in costume flags. No text.`,
+    body: `${CLEAN} ${PRESENCE} They now stand at the head of a terracotta silk carpet in a civic hall of timber, brass and bronze-glass. Dusk through a vast window. Honour attendants far behind, never in costume flags. ${TCHAD_PLACE} No text.`,
     videoHint: "Cloth and window light move. Guests stay large. No text.",
   },
   {
@@ -127,13 +127,13 @@ export const SYSTEM_PROMPTS = [
   {
     category: "Horizon",
     title: "Dune",
-    body: `${CLEAN} ${PRESENCE} They now stand in a Sahel dune field at golden hour. Wind in linen, a quiet solar field and a distant maglev line behind them. No text.`,
+    body: `${CLEAN} ${PRESENCE} They now stand in a Sahel dune field at golden hour. Wind in linen, a quiet solar field and a distant maglev line behind them. ${TCHAD_PLACE} No text.`,
     videoHint: "Sand and fabric drift. Guests stay large. No text.",
   },
   {
     category: "Horizon",
     title: "Ridge",
-    body: `${CLEAN} ${PRESENCE} They now stand on a sandstone ridge at late sun. Red mesas, an observatory silhouette, heat haze. Advanced science in an African landscape. No text.`,
+    body: `${CLEAN} ${PRESENCE} They now stand on a sandstone ridge at late sun. Red mesas, an observatory silhouette, heat haze. Advanced science in an African landscape. ${TCHAD_PLACE} No text.`,
     videoHint: "Heat haze and grass. Guests stay large. No text.",
   },
   {
@@ -145,13 +145,13 @@ export const SYSTEM_PROMPTS = [
   {
     category: "Horizon",
     title: "Hearth",
-    body: `${CLEAN} ${PRESENCE} They now stand in a laterite courtyard of earth houses with arched doors and solar glass roofs. Neem shade, late sun, a quiet workshop. Lived-in and sophisticated. No text.`,
+    body: `${CLEAN} ${PRESENCE} They now stand in a laterite courtyard of earth houses with arched doors and solar glass roofs. Neem shade, late sun, a quiet workshop. Lived-in and sophisticated. ${TCHAD_PLACE} No text.`,
     videoHint: "Dry wind and cloth. Guests stay large. No text.",
   },
   {
     category: "Horizon",
     title: "Stone",
-    body: `${CLEAN} ${PRESENCE} They now stand before red sandstone pillars in golden light. A small bronze-glass research camp at their base. Cinematic dust. No text.`,
+    body: `${CLEAN} ${PRESENCE} They now stand before red sandstone pillars in golden light. A small bronze-glass research camp at their base. Cinematic dust. ${TCHAD_PLACE} No text.`,
     videoHint: "Sand and cloth in the wind. Guests stay large. No text.",
   },
   {

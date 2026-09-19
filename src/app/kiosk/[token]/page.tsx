@@ -585,9 +585,9 @@ export default function KioskPage() {
                 <small>{copy.formatBothHint.fr}</small>
               </button>
             </div>
-            <div className="camera-tools">
-              <button type="button" onClick={() => setStep("review")}>{copy.back.fr}</button>
-            </div>
+            <button className="btn btn-quiet mt-3 w-full" type="button" onClick={() => setStep("review")}>
+              <Pair en={copy.back.en} fr={copy.back.fr} />
+            </button>
           </div>
         </section>
       ) : null}
@@ -602,7 +602,7 @@ export default function KioskPage() {
                 <h1 className="mt-3 text-4xl">{copy.pick.fr}</h1>
                 <p className="pair-fr mt-2">{copy.pick.en}</p>
               </div>
-              <button type="button" onClick={() => setStep("review")} className="shrink-0">
+              <button type="button" onClick={() => setStep(booth?.videoEnabled ? "format" : "review")} className="shrink-0">
                 <img src={preview} alt="" className="kiosk-style-face" />
               </button>
             </div>

@@ -5,6 +5,7 @@ export const BRAND = {
   fr: "Studio IA Tchad",
   short: "Studio IA",
   mark: "IA",
-  crest: "/brand/studio-ia-tchad.png?v=3",
+  crest: "/brand/studio-ia-tchad.svg",
+  crestRaster: "/brand/studio-ia-tchad.png",
   description: "Gardez votre visage. Changez le lieu.",
 } as const;

@@ -11,7 +11,7 @@ export function BrandMark({ href, compact = false, className = "" }: BrandMarkPr
   const label = compact ? BRAND.short : BRAND.fr;
   const inner = (
     <>
-      <img src={BRAND.crest} alt="" className="brand-crest" width={compact ? 36 : 52} height={compact ? 36 : 52} />
+      <img src={BRAND.crest} alt="" className="brand-crest" width={compact ? 36 : 48} height={compact ? 36 : 48} />
       <span className="brand-copy">
         <span>{label}</span>
         {compact ? null : <small className="brand-en">{BRAND.name}</small>}

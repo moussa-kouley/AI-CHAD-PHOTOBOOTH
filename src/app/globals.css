@@ -2109,19 +2109,24 @@ button { cursor: pointer; }
   gap: 0.65rem;
 }
 
-.brand-crest {
-  width: 2.25rem;
-  height: 2.25rem;
+.brand-crest,
+.attract-crest {
+  display: block;
+  width: auto !important;
+  height: auto;
+  max-width: 3rem;
+  max-height: 3rem;
   flex: none;
   object-fit: contain;
+  object-position: center;
   background: transparent;
   filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
 }
 
 .brand-mark-row .brand-crest,
 .studio-mark .brand-crest {
-  width: 2.25rem;
-  height: 2.25rem;
+  max-width: 2.25rem;
+  max-height: 2.25rem;
 }
 
 .brand-mark span {
@@ -2155,21 +2160,15 @@ button { cursor: pointer; }
 }
 
 .attract-crest {
-  display: block;
-  width: 3rem;
-  height: 3rem;
-  max-width: 3rem;
-  max-height: 3rem;
-  object-fit: contain;
-  background: transparent;
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
 }
 
 .attract-brand {
   display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  margin: 0 0 0.85rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
   max-width: 22rem;
 }
 
@@ -2182,7 +2181,7 @@ button { cursor: pointer; }
 
 .attract-brand-copy strong {
   font-family: var(--font-display-stack);
-  font-size: 1.35rem;
+  font-size: clamp(1.45rem, 2.4vw, 1.85rem);
   font-weight: 400;
   line-height: 1.05;
   color: #f7f2e8;

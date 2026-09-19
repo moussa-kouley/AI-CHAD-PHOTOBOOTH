@@ -85,26 +85,30 @@ async function prepareMark(raw: Buffer) {
 
 async function houseMark(brand: BrandKit, maxW: number, maxH: number, gold: string, paper: string) {
   const size = Math.min(maxW, maxH);
-  try {
-    const crest = await readFile(path.join(process.cwd(), "public/brand/studio-ia-tchad.png"));
-    return sharp(crest)
-      .resize(size, size, {
-        fit: "contain",
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-        kernel: sharp.kernel.lanczos3,
-      })
-      .png()
-      .toBuffer();
-  } catch {
-    const letters = initials(brand.eventName || brand.signature || BRAND.mark);
-    const stroke = Math.max(5, Math.round(size * 0.035));
-    return sharp(Buffer.from(`
+  const dir = path.join(process.cwd(), "public/brand");
+  for (const file of ["studio-ia-tchad.svg", "studio-ia-tchad.png"]) {
+    try {
+      const crest = await readFile(path.join(dir, file));
+      return sharp(crest, { density: 288 })
+        .resize(size, size, {
+          fit: "contain",
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+          kernel: sharp.kernel.lanczos3,
+        })
+        .png()
+        .toBuffer();
+    } catch {
+      continue;
+    }
+  }
+  const letters = initials(brand.eventName || brand.signature || BRAND.mark);
+  const stroke = Math.max(5, Math.round(size * 0.035));
+  return sharp(Buffer.from(`
     <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
       <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 2}" fill="${paper}" stroke="${gold}" stroke-width="${stroke}"/>
       <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - stroke * 2.6}" fill="none" stroke="${gold}" stroke-width="1.5" opacity="0.7"/>
       <text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle" fill="${gold}" font-size="${Math.round(size * 0.32)}" font-family="Georgia, serif">${escapeXml(letters)}</text>
     </svg>`)).png().toBuffer();
-  }
 }
 
 type PlateMark = {

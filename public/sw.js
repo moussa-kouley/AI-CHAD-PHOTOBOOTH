@@ -1,5 +1,5 @@
-const SHELL = "studio-ia-shell-v3";
-const SHELL_URLS = ["/", "/manifest.json", "/icon.svg", "/brand/studio-ia-tchad.png"];
+const SHELL = "studio-ia-shell-v4";
+const SHELL_URLS = ["/", "/manifest.json", "/icon.svg", "/brand/studio-ia-tchad.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(SHELL).then((cache) => cache.addAll(SHELL_URLS)));

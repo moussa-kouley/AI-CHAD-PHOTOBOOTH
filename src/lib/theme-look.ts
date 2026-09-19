@@ -54,12 +54,12 @@ export const THEME_LOOK: Record<string, ThemeLook> = {
   Bench: { wash: "linear-gradient(165deg,#0c1428 0%,#c8a25a 48%,#12203a 100%)", note: "Atelier", cover: "/themes/bench.webp", motif: "atelier", plate: false, hint: "Gouvernance" },
   Envoy: { wash: "linear-gradient(165deg,#1a1410 0%,#8a6a38 50%,#120e0a 100%)", note: "Atelier", cover: "/themes/envoy.webp", motif: "atelier", plate: false, hint: "Gouvernance" },
   Harvest: { wash: "linear-gradient(165deg,#2a1408 0%,#c46a28 50%,#1a0c08 100%)", note: "Atelier", cover: "/themes/harvest.webp", motif: "atelier", plate: false, hint: "Sahel" },
-  Lunettes: { wash: "linear-gradient(165deg,#08060c 0%,#3a3a48 46%,#c8a25a 100%)", note: "XR", cover: "/themes/nation-xr.webp", motif: "xr", plate: false, hint: "Lunettes" },
-  "Salle XR": { wash: "linear-gradient(165deg,#0a0c14 0%,#2a3a48 48%,#8ab4c8 100%)", note: "XR", cover: "/themes/vault.webp", motif: "xr", plate: false, hint: "Cave" },
-  Jeu: { wash: "linear-gradient(165deg,#141018 0%,#6a5a38 48%,#1a2430 100%)", note: "XR", cover: "/themes/court.webp", motif: "xr", plate: false, hint: "Jeu" },
-  Spatial: { wash: "linear-gradient(165deg,#002664 0%,#c8a25a 42%,#16325c 100%)", note: "XR", cover: "/themes/orbit.webp", motif: "xr", plate: false, hint: "N’Djamena" },
+  Lunettes: { wash: "linear-gradient(165deg,#08060c 0%,#3a3a48 46%,#c8a25a 100%)", note: "XR", cover: "/themes/nation.webp", motif: "xr", plate: false, hint: "Place de la Nation" },
+  "Salle XR": { wash: "linear-gradient(165deg,#0a0c14 0%,#2a3a48 48%,#8ab4c8 100%)", note: "XR", cover: "/themes/forum.webp", motif: "xr", plate: false, hint: "Forum" },
+  Jeu: { wash: "linear-gradient(165deg,#141018 0%,#6a5a38 48%,#1a2430 100%)", note: "XR", cover: "/themes/court.webp", motif: "xr", plate: false, hint: "Court" },
+  Spatial: { wash: "linear-gradient(165deg,#002664 0%,#c8a25a 42%,#16325c 100%)", note: "XR", cover: "/themes/nation-xr.webp", motif: "xr", plate: false, hint: "Nation" },
   Holo: { wash: "linear-gradient(165deg,#1a1408 0%,#d4ae63 46%,#141820 100%)", note: "XR", cover: "/themes/nation-xr.webp", motif: "xr", plate: false, hint: "Place de la Nation" },
-  Visor: { wash: "linear-gradient(165deg,#2a1408 0%,#d4ae63 48%,#C8102E 100%)", note: "XR", cover: "/themes/dune.webp", motif: "xr", plate: false, hint: "Sahel" },
+  Visor: { wash: "linear-gradient(165deg,#2a1408 0%,#d4ae63 48%,#C8102E 100%)", note: "XR", cover: "/themes/dune.webp", motif: "xr", plate: false, hint: "Dune" },
 };
 
 const OLD_TITLES: Record<string, string> = {
@@ -206,12 +206,8 @@ export function accentFromBody(body?: string) {
 }
 
 export function attractCovers() {
-  const order = ["Vault", "Forum", "Arrival", "Court", "Orbit", "Dune", "Ridge", "Hearth", "Stone"];
-  const entries = Object.entries(THEME_LOOK).filter(([, look]) => Boolean(look.cover));
-  const ranked = [...entries].sort((a, b) => {
-    const ai = order.indexOf(a[0]);
-    const bi = order.indexOf(b[0]);
-    return (ai < 0 ? 80 : ai) - (bi < 0 ? 80 : bi);
-  });
-  return ranked;
+  const order = ["Vault", "Forum", "Holo", "Arrival", "Court", "Dune", "Ridge", "Hearth", "Stone"];
+  return order
+    .map((name) => [name, THEME_LOOK[name]] as const)
+    .filter((row): row is readonly [string, ThemeLook] => Boolean(row[1]?.cover));
 }
