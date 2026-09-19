@@ -7,7 +7,10 @@ import { AppError } from "./errors";
 import { apiCopy } from "./studio-copy";
 
 const cookieName = "lumen_session";
-const secret = new TextEncoder().encode(env.AUTH_SECRET);
+
+function secret() {
+  return new TextEncoder().encode(env.AUTH_SECRET);
+}
 
 export type SessionPayload = {
   userId: string;
@@ -28,7 +31,7 @@ export async function createSession(payload: SessionPayload) {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secret);
+    .sign(secret());
 
   const store = await cookies();
   store.set(cookieName, token, {
@@ -46,11 +49,11 @@ export async function clearSession() {
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
-  const store = await cookies();
-  const token = store.get(cookieName)?.value;
-  if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const store = await cookies();
+    const token = store.get(cookieName)?.value;
+    if (!token) return null;
+    const { payload } = await jwtVerify(token, secret());
     if (!payload.userId || !payload.workspaceId) return null;
     return {
       userId: String(payload.userId),

@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { readApiJson } from "@/lib/api-json";
 import { studio } from "@/lib/studio-copy";
 
 export default function RegisterPage() {
@@ -10,9 +11,12 @@ export default function RegisterPage() {
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    fetch("/api/me").then((r) => r.json()).then((data) => {
-      if (data.user) window.location.href = "/app";
-    });
+    fetch("/api/me")
+      .then((response) => readApiJson<{ user?: unknown }>(response))
+      .then((data) => {
+        if (data.user) window.location.href = "/app";
+      })
+      .catch(() => undefined);
   }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -29,10 +33,10 @@ export default function RegisterPage() {
         workspaceName: form.get("workspaceName"),
       }),
     });
-    const data = await response.json();
+    const data = await readApiJson<{ error?: string }>(response);
     setPending(false);
     if (!response.ok) {
-      setError(data.error || studio.auth.registerFail);
+      setError(typeof data.error === "string" ? data.error : studio.auth.registerFail);
       return;
     }
     window.location.href = "/app";
