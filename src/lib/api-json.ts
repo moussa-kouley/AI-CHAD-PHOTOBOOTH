@@ -7,5 +7,5 @@ export async function readApiJson<T extends Record<string, unknown> = Record<str
   }
   return {
     error: "Le serveur a renvoyé une page au lieu de JSON. Vérifiez les variables d’environnement sur Vercel.",
-  } as T;
+  } as unknown as T;
 }
