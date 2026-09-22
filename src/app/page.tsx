@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { HomeLiveStill } from "@/components/home-live-still";
+import { FGI_DAY1_MODERATOR, FGI_OPENING, FGI_PANELS, FGI_WORKSHOPS } from "@/lib/fgi-agenda";
 import { attractCovers } from "@/lib/theme-look";
 
 const covers = attractCovers();
@@ -87,6 +88,7 @@ export default function HomePage() {
             <img src="/brand/igf.webp" alt="Internet Governance Forum" className="home-igf" />
           </div>
           <nav>
+            <a href="#agenda">Agenda</a>
             <Link href="/login">Connexion</Link>
             <Link className="home-nav-go" href="/register">
               Commencer
@@ -131,6 +133,62 @@ export default function HomePage() {
           </div>
         </div>
         <HomeLiveStill />
+      </section>
+
+      <section className="home-block home-agenda" id="agenda">
+        <header className="home-head">
+          <p className="eyebrow">Agenda · 10e édition</p>
+          <h2>Panélistes et ateliers.</h2>
+        </header>
+
+        <div className="home-open">
+          <p className="eyebrow">Ouverture</p>
+          <ul>
+            {FGI_OPENING.map((name) => (
+              <li key={name}>{name}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="home-agenda-days">
+          <article className="home-day">
+            <header>
+              <p className="eyebrow">23 sept. · ONAMA</p>
+              <h3>Jour 1 — Panels</h3>
+              <p className="home-mod">
+                Modération <b>{FGI_DAY1_MODERATOR}</b>
+              </p>
+            </header>
+            <ol className="home-panels">
+              {FGI_PANELS.map((panel) => (
+                <li key={panel.n}>
+                  <p className="eyebrow">Panel {panel.n}</p>
+                  <h4>{panel.title}</h4>
+                  <ul className="home-people">
+                    {panel.people.map((name) => (
+                      <li key={name}>{name}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ol>
+          </article>
+
+          <article className="home-day home-day-two">
+            <header>
+              <p className="eyebrow">24 sept. · WenakLabs</p>
+              <h3>Jour 2 — Ateliers</h3>
+            </header>
+            <ul className="home-ateliers">
+              {FGI_WORKSHOPS.map((item) => (
+                <li key={item.name}>
+                  <b>{item.name}</b>
+                  <span>{item.topic}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        </div>
       </section>
 
       <section className="home-block">

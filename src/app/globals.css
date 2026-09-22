@@ -491,6 +491,115 @@ body:has(.home) {
   border-top: 1px solid rgba(126, 200, 255, 0.14);
 }
 
+.home-agenda {
+  scroll-margin-top: 5.2rem;
+}
+
+.home-open {
+  margin: 0 0 1.8rem;
+  padding: 1.2rem 1.05rem 1.15rem;
+  border: 1px solid rgba(254, 203, 0, 0.28);
+  background: linear-gradient(180deg, rgba(40, 32, 0, 0.35), rgba(0, 16, 44, 0.55));
+}
+
+.home-open ul,
+.home-people,
+.home-ateliers,
+.home-panels {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-open ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1.1rem;
+  margin-top: 0.55rem;
+  color: #f4f8ff;
+  font-size: 1.02rem;
+}
+
+.home-agenda-days {
+  display: grid;
+  gap: 1.6rem;
+}
+
+.home-day h3 {
+  margin: 0.45rem 0 0;
+  color: #f4f8ff;
+  font-family: var(--font-display-stack);
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.home-mod {
+  margin: 0.55rem 0 0;
+  color: #9cc4e8;
+  font-size: 0.95rem;
+}
+
+.home-mod b {
+  color: #FECB00;
+  font-weight: 650;
+}
+
+.home-panels {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.15rem;
+}
+
+.home-panels > li {
+  padding: 1.05rem 1.05rem 1rem;
+  border: 1px solid rgba(126, 200, 255, 0.22);
+  background: linear-gradient(180deg, rgba(0, 58, 120, 0.42), rgba(0, 16, 44, 0.55));
+}
+
+.home-panels h4 {
+  margin: 0.4rem 0 0;
+  color: #f4f8ff;
+  font-size: 1.12rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.home-people {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  margin-top: 0.7rem;
+  color: #c5d8ee;
+  font-size: 0.95rem;
+}
+
+.home-ateliers {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.15rem;
+}
+
+.home-ateliers li {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.15rem 1.05rem 1.1rem;
+  border: 1px solid rgba(254, 203, 0, 0.28);
+  background: linear-gradient(180deg, rgba(0, 58, 120, 0.38), rgba(0, 16, 44, 0.55));
+}
+
+.home-ateliers b {
+  color: #FECB00;
+  font-size: 1.08rem;
+  font-weight: 650;
+}
+
+.home-ateliers span {
+  color: #e8f3ff;
+  line-height: 1.45;
+}
+
 .home-head {
   max-width: 40rem;
   margin-bottom: 1.8rem;
@@ -608,6 +717,12 @@ body:has(.home) {
 
   .home-rails {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .home-agenda-days {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr);
+    gap: 1.4rem 1.6rem;
+    align-items: start;
   }
 }
 
