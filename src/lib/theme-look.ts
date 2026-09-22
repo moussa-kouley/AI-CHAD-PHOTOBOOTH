@@ -1,6 +1,14 @@
 export type ThemeLook = { wash: string; note: string; cover?: string; motif?: string; plate?: boolean; hint?: string };
 
 export const THEME_LOOK: Record<string, ThemeLook> = {
+  FGI: { wash: "linear-gradient(165deg,#002664 0%,#1a7ad9 48%,#050508 100%)", note: "FGI", cover: "/themes/fgi-cover.jpg", motif: "horizon", hint: "10e édition" },
+  IA: { wash: "linear-gradient(165deg,#041428 0%,#0a5ad4 48%,#050508 100%)", note: "IA", cover: "/themes/fgi-ia.jpg", motif: "horizon", hint: "N’Djamena" },
+  Cyber: { wash: "linear-gradient(165deg,#020814 0%,#0a3a88 50%,#c8a25a 100%)", note: "Cybersécurité", cover: "/themes/fgi-cyber.jpg", motif: "horizon", hint: "Tchad" },
+  "École": { wash: "linear-gradient(165deg,#0a2048 0%,#3aa0e8 48%,#d4ae63 100%)", note: "Éducation", cover: "/themes/fgi-ecole.jpg", motif: "horizon", hint: "N’Djamena" },
+  "Réseau": { wash: "linear-gradient(165deg,#001830 0%,#0a6ad8 46%,#FECB00 100%)", note: "Gouvernance", cover: "/themes/fgi-reseau.jpg", motif: "horizon", hint: "IGF" },
+  Jeunesse: { wash: "linear-gradient(165deg,#002664 0%,#1a4a9a 48%,#C8102E 100%)", note: "Jeunesse", cover: "/themes/fgi-jeunesse.jpg", motif: "horizon", hint: "Place de la Nation" },
+  Tchad: { wash: "linear-gradient(165deg,#002664 0%,#1a7ad9 42%,#C8102E 100%)", note: "FGI", cover: "/themes/fgi-tchad.jpg", motif: "horizon", hint: "N’Djamena" },
+  Sahel: { wash: "linear-gradient(165deg,#3a2410 0%,#c88828 48%,#002664 100%)", note: "Tchad", cover: "/themes/fgi-sahel.jpg", motif: "horizon", hint: "Sahel" },
   Carpet: { wash: "linear-gradient(165deg,#2a060c 0%,#8b1d2c 42%,#d4ae63 100%)", note: "Night", motif: "night" },
   Studio: { wash: "linear-gradient(165deg,#1a1816 0%,#6d6558 48%,#002664 100%)", note: "Night", motif: "night" },
   Gala: { wash: "linear-gradient(165deg,#0c0c12 0%,#2a2340 46%,#C8102E 100%)", note: "Night", motif: "night" },
@@ -12,15 +20,15 @@ export const THEME_LOOK: Record<string, ThemeLook> = {
   Quay: { wash: "linear-gradient(165deg,#0a1018 0%,#2a3a68 48%,#c4a06a 100%)", note: "Worlds", motif: "worlds" },
   Pulse: { wash: "linear-gradient(165deg,#1a0c08 0%,#c45a14 46%,#2a1808 100%)", note: "Worlds", motif: "worlds" },
   Marina: { wash: "linear-gradient(165deg,#0a0c12 0%,#8a6a28 50%,#141018 100%)", note: "Worlds", motif: "worlds" },
-  Orbit: { wash: "linear-gradient(165deg,#002664 0%,#d4ae63 48%,#0c1018 100%)", note: "Horizon", cover: "/themes/orbit.webp", motif: "horizon", hint: "N’Djamena" },
-  Vault: { wash: "linear-gradient(165deg,#2a1810 0%,#c8b89a 50%,#1a2430 100%)", note: "Horizon", cover: "/themes/vault.webp", motif: "horizon", hint: "Pavillon" },
-  Arrival: { wash: "linear-gradient(165deg,#2a1008 0%,#c45a28 48%,#002664 100%)", note: "Horizon", cover: "/themes/arrival.webp", motif: "horizon", hint: "Nation" },
-  Forum: { wash: "linear-gradient(165deg,#002664 0%,#d4ae63 48%,#1a140c 100%)", note: "Horizon", cover: "/themes/nation.webp", motif: "horizon", hint: "Place de la Nation" },
-  Dune: { wash: "linear-gradient(165deg,#3a2410 0%,#c88828 48%,#1a1408 100%)", note: "Horizon", cover: "/themes/dune.webp", motif: "horizon", hint: "Sahel" },
-  Ridge: { wash: "linear-gradient(165deg,#2a1008 0%,#c46a38 50%,#3a2010 100%)", note: "Horizon", cover: "/themes/ridge.webp", motif: "horizon", hint: "Jeunesse" },
-  Court: { wash: "linear-gradient(165deg,#002664 0%,#d8c8a8 48%,#1a2430 100%)", note: "Horizon", cover: "/themes/court.webp", motif: "horizon", hint: "Forum" },
-  Hearth: { wash: "linear-gradient(165deg,#6a4a28 0%,#d4b07a 50%,#C8102E 100%)", note: "Horizon", cover: "/themes/hearth.webp", motif: "horizon", hint: "Tchad" },
-  Stone: { wash: "linear-gradient(165deg,#2a1008 0%,#c46a38 50%,#3a2010 100%)", note: "Horizon", cover: "/themes/stone.webp", motif: "horizon", hint: "Sahel" },
+  Orbit: { wash: "linear-gradient(165deg,#002664 0%,#d4ae63 48%,#0c1018 100%)", note: "Horizon", cover: "/themes/fgi-reseau.jpg", motif: "horizon", hint: "N’Djamena" },
+  Vault: { wash: "linear-gradient(165deg,#2a1810 0%,#c8b89a 50%,#1a2430 100%)", note: "Horizon", cover: "/themes/fgi-forum.jpg", motif: "horizon", hint: "Forum" },
+  Arrival: { wash: "linear-gradient(165deg,#2a1008 0%,#c45a28 48%,#002664 100%)", note: "Horizon", cover: "/themes/fgi-jeunesse.jpg", motif: "horizon", hint: "Nation" },
+  Forum: { wash: "linear-gradient(165deg,#002664 0%,#1a7ad9 48%,#1a140c 100%)", note: "Gouvernance", cover: "/themes/fgi-forum.jpg", motif: "horizon", hint: "FGI Tchad" },
+  Dune: { wash: "linear-gradient(165deg,#3a2410 0%,#c88828 48%,#1a1408 100%)", note: "Horizon", cover: "/themes/fgi-sahel.jpg", motif: "horizon", hint: "Sahel" },
+  Ridge: { wash: "linear-gradient(165deg,#2a1008 0%,#c46a38 50%,#3a2010 100%)", note: "Horizon", cover: "/themes/fgi-ecole.jpg", motif: "horizon", hint: "Éducation" },
+  Court: { wash: "linear-gradient(165deg,#002664 0%,#d8c8a8 48%,#1a2430 100%)", note: "Horizon", cover: "/themes/fgi-reseau.jpg", motif: "horizon", hint: "IGF" },
+  Hearth: { wash: "linear-gradient(165deg,#6a4a28 0%,#d4b07a 50%,#C8102E 100%)", note: "Horizon", cover: "/themes/fgi-tchad.jpg", motif: "horizon", hint: "Tchad" },
+  Stone: { wash: "linear-gradient(165deg,#2a1008 0%,#c46a38 50%,#3a2010 100%)", note: "Horizon", cover: "/themes/fgi-cyber.jpg", motif: "horizon", hint: "Cyber" },
   Painting: { wash: "linear-gradient(165deg,#1c1208 0%,#5a3a18 50%,#120e0a 100%)", note: "Art", motif: "art" },
   Neon: { wash: "linear-gradient(165deg,#080610 0%,#b01e6c 40%,#0d4a4a 100%)", note: "Art", motif: "art" },
   Film: { wash: "linear-gradient(165deg,#1a1610 0%,#8a6a38 50%,#12100c 100%)", note: "Art", motif: "art" },
@@ -41,25 +49,25 @@ export const THEME_LOOK: Record<string, ThemeLook> = {
   Blush: { wash: "linear-gradient(165deg,#2a1820 0%,#e8b8c8 48%,#8a5060 100%)", note: "Baby", motif: "baby" },
   Cap: { wash: "linear-gradient(165deg,#0c1428 0%,#c8a25a 48%,#12203a 100%)", note: "Grad", motif: "grad" },
   Hall: { wash: "linear-gradient(165deg,#1a140c 0%,#8a6a38 50%,#120e0a 100%)", note: "Grad", motif: "grad" },
-  Astro: { wash: "linear-gradient(165deg,#040814 0%,#c8a25a 42%,#16325c 100%)", note: "Atelier", cover: "/themes/astro.webp", motif: "atelier", plate: false, hint: "IA" },
-  Lab: { wash: "linear-gradient(165deg,#141820 0%,#d8d0c4 48%,#2a3040 100%)", note: "Atelier", cover: "/themes/lab.webp", motif: "atelier", plate: false, hint: "IA" },
-  Duty: { wash: "linear-gradient(165deg,#1a1408 0%,#6a7a48 48%,#2a2010 100%)", note: "Atelier", cover: "/themes/duty.webp", motif: "atelier", plate: false, hint: "Nation" },
-  Clinic: { wash: "linear-gradient(165deg,#1a2428 0%,#d4e0dc 50%,#243038 100%)", note: "Atelier", cover: "/themes/clinic.webp", motif: "atelier", plate: false },
-  Forge: { wash: "linear-gradient(165deg,#1a1008 0%,#c46a28 48%,#121018 100%)", note: "Atelier", cover: "/themes/forge.webp", motif: "atelier", plate: false },
-  Flight: { wash: "linear-gradient(165deg,#0a1018 0%,#4a6080 48%,#c8a25a 100%)", note: "Atelier", cover: "/themes/flight.webp", motif: "atelier", plate: false },
-  Signal: { wash: "linear-gradient(165deg,#0c0c12 0%,#3a3a48 50%,#1a1816 100%)", note: "Atelier", cover: "/themes/signal.webp", motif: "atelier", plate: false, hint: "IA" },
-  Draft: { wash: "linear-gradient(165deg,#2a1810 0%,#c8b89a 50%,#1a2430 100%)", note: "Atelier", cover: "/themes/draft.webp", motif: "atelier", plate: false },
-  Solar: { wash: "linear-gradient(165deg,#3a2410 0%,#c88828 48%,#1a1408 100%)", note: "Atelier", cover: "/themes/solar.webp", motif: "atelier", plate: false, hint: "Sahel" },
-  Press: { wash: "linear-gradient(165deg,#1a0c08 0%,#c45a14 46%,#2a1808 100%)", note: "Atelier", cover: "/themes/press.webp", motif: "atelier", plate: false },
-  Bench: { wash: "linear-gradient(165deg,#0c1428 0%,#c8a25a 48%,#12203a 100%)", note: "Atelier", cover: "/themes/bench.webp", motif: "atelier", plate: false, hint: "Gouvernance" },
-  Envoy: { wash: "linear-gradient(165deg,#1a1410 0%,#8a6a38 50%,#120e0a 100%)", note: "Atelier", cover: "/themes/envoy.webp", motif: "atelier", plate: false, hint: "Gouvernance" },
-  Harvest: { wash: "linear-gradient(165deg,#2a1408 0%,#c46a28 50%,#1a0c08 100%)", note: "Atelier", cover: "/themes/harvest.webp", motif: "atelier", plate: false, hint: "Sahel" },
-  Lunettes: { wash: "linear-gradient(165deg,#08060c 0%,#3a3a48 46%,#c8a25a 100%)", note: "XR", cover: "/themes/nation.webp", motif: "xr", plate: false, hint: "Place de la Nation" },
-  "Salle XR": { wash: "linear-gradient(165deg,#0a0c14 0%,#2a3a48 48%,#8ab4c8 100%)", note: "XR", cover: "/themes/forum.webp", motif: "xr", plate: false, hint: "Forum" },
-  Jeu: { wash: "linear-gradient(165deg,#141018 0%,#6a5a38 48%,#1a2430 100%)", note: "XR", cover: "/themes/court.webp", motif: "xr", plate: false, hint: "Court" },
-  Spatial: { wash: "linear-gradient(165deg,#002664 0%,#c8a25a 42%,#16325c 100%)", note: "XR", cover: "/themes/nation-xr.webp", motif: "xr", plate: false, hint: "Nation" },
-  Holo: { wash: "linear-gradient(165deg,#1a1408 0%,#d4ae63 46%,#141820 100%)", note: "XR", cover: "/themes/nation-xr.webp", motif: "xr", plate: false, hint: "Place de la Nation" },
-  Visor: { wash: "linear-gradient(165deg,#2a1408 0%,#d4ae63 48%,#C8102E 100%)", note: "XR", cover: "/themes/dune.webp", motif: "xr", plate: false, hint: "Dune" },
+  Astro: { wash: "linear-gradient(165deg,#040814 0%,#c8a25a 42%,#16325c 100%)", note: "Atelier", cover: "/themes/fgi-ia.jpg", motif: "atelier", plate: false, hint: "IA" },
+  Lab: { wash: "linear-gradient(165deg,#141820 0%,#d8d0c4 48%,#2a3040 100%)", note: "Atelier", cover: "/themes/fgi-ecole.jpg", motif: "atelier", plate: false, hint: "Éducation" },
+  Duty: { wash: "linear-gradient(165deg,#1a1408 0%,#6a7a48 48%,#2a2010 100%)", note: "Atelier", cover: "/themes/fgi-forum.jpg", motif: "atelier", plate: false, hint: "Nation" },
+  Clinic: { wash: "linear-gradient(165deg,#1a2428 0%,#d4e0dc 50%,#243038 100%)", note: "Atelier", cover: "/themes/fgi-ecole.jpg", motif: "atelier", plate: false, hint: "Éducation" },
+  Forge: { wash: "linear-gradient(165deg,#1a1008 0%,#c46a28 48%,#121018 100%)", note: "Atelier", cover: "/themes/fgi-sahel.jpg", motif: "atelier", plate: false, hint: "Sahel" },
+  Flight: { wash: "linear-gradient(165deg,#0a1018 0%,#4a6080 48%,#c8a25a 100%)", note: "Atelier", cover: "/themes/fgi-reseau.jpg", motif: "atelier", plate: false, hint: "Réseau" },
+  Signal: { wash: "linear-gradient(165deg,#0c0c12 0%,#3a3a48 50%,#1a1816 100%)", note: "Atelier", cover: "/themes/fgi-cyber.jpg", motif: "atelier", plate: false, hint: "Cyber" },
+  Draft: { wash: "linear-gradient(165deg,#2a1810 0%,#c8b89a 50%,#1a2430 100%)", note: "Atelier", cover: "/themes/fgi-forum.jpg", motif: "atelier", plate: false, hint: "Forum" },
+  Solar: { wash: "linear-gradient(165deg,#3a2410 0%,#c88828 48%,#1a1408 100%)", note: "Atelier", cover: "/themes/fgi-sahel.jpg", motif: "atelier", plate: false, hint: "Sahel" },
+  Press: { wash: "linear-gradient(165deg,#1a0c08 0%,#c45a14 46%,#2a1808 100%)", note: "Atelier", cover: "/themes/fgi-jeunesse.jpg", motif: "atelier", plate: false, hint: "Jeunesse" },
+  Bench: { wash: "linear-gradient(165deg,#0c1428 0%,#c8a25a 48%,#12203a 100%)", note: "Atelier", cover: "/themes/fgi-forum.jpg", motif: "atelier", plate: false, hint: "Gouvernance" },
+  Envoy: { wash: "linear-gradient(165deg,#1a1410 0%,#8a6a38 50%,#120e0a 100%)", note: "Atelier", cover: "/themes/fgi-tchad.jpg", motif: "atelier", plate: false, hint: "Gouvernance" },
+  Harvest: { wash: "linear-gradient(165deg,#2a1408 0%,#c46a28 50%,#1a0c08 100%)", note: "Atelier", cover: "/themes/fgi-sahel.jpg", motif: "atelier", plate: false, hint: "Sahel" },
+  Lunettes: { wash: "linear-gradient(165deg,#08060c 0%,#3a3a48 46%,#c8a25a 100%)", note: "XR", cover: "/themes/fgi-ia.jpg", motif: "xr", plate: false, hint: "IA" },
+  "Salle XR": { wash: "linear-gradient(165deg,#0a0c14 0%,#2a3a48 48%,#8ab4c8 100%)", note: "XR", cover: "/themes/fgi-forum.jpg", motif: "xr", plate: false, hint: "Forum" },
+  Jeu: { wash: "linear-gradient(165deg,#141018 0%,#6a5a38 48%,#1a2430 100%)", note: "XR", cover: "/themes/fgi-jeunesse.jpg", motif: "xr", plate: false, hint: "Jeunesse" },
+  Spatial: { wash: "linear-gradient(165deg,#002664 0%,#c8a25a 42%,#16325c 100%)", note: "XR", cover: "/themes/fgi-cyber.jpg", motif: "xr", plate: false, hint: "Cyber" },
+  Holo: { wash: "linear-gradient(165deg,#1a1408 0%,#d4ae63 46%,#141820 100%)", note: "XR", cover: "/themes/fgi-ia.jpg", motif: "xr", plate: false, hint: "IA" },
+  Visor: { wash: "linear-gradient(165deg,#2a1408 0%,#d4ae63 48%,#C8102E 100%)", note: "XR", cover: "/themes/fgi-tchad.jpg", motif: "xr", plate: false, hint: "Tchad" },
 };
 
 const OLD_TITLES: Record<string, string> = {
@@ -99,7 +107,7 @@ const OLD_TITLES: Record<string, string> = {
   "Ice atelier": "Ice",
 };
 
-export const CATEGORY_ORDER = ["Atelier", "XR", "Birthday", "Wedding", "Party", "Baby", "Grad", "Horizon", "Chad", "Tchad", "Worlds", "Night", "Identity", "Art", "Custom"];
+export const CATEGORY_ORDER = ["FGI", "IA", "Cybersécurité", "Éducation", "Gouvernance", "Jeunesse", "Atelier", "XR", "Horizon", "Chad", "Tchad", "Birthday", "Wedding", "Party", "Baby", "Grad", "Worlds", "Night", "Identity", "Art", "Custom"];
 
 const MOTIF: Record<string, string> = {
   Birthday: "birthday",
@@ -113,6 +121,12 @@ const MOTIF: Record<string, string> = {
   Horizon: "horizon",
   Chad: "horizon",
   Tchad: "horizon",
+  FGI: "horizon",
+  IA: "horizon",
+  Cybersécurité: "horizon",
+  Éducation: "horizon",
+  Gouvernance: "horizon",
+  Jeunesse: "horizon",
   Worlds: "worlds",
   Night: "night",
   Identity: "night",
@@ -206,7 +220,7 @@ export function accentFromBody(body?: string) {
 }
 
 export function attractCovers() {
-  const order = ["Vault", "Forum", "Holo", "Arrival", "Court", "Dune", "Ridge", "Hearth", "Stone"];
+  const order = ["IA", "Cyber", "École", "Réseau", "Forum", "Jeunesse", "Sahel", "Tchad"];
   return order
     .map((name) => [name, THEME_LOOK[name]] as const)
     .filter((row): row is readonly [string, ThemeLook] => Boolean(row[1]?.cover));

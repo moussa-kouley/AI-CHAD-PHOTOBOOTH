@@ -23,7 +23,7 @@ export function StudioNav() {
             <Link
               key={link.href}
               href={link.href}
-              data-on={link.match(path)}
+              data-on={link.match(path) ? "true" : undefined}
             >
               {link.label}
             </Link>

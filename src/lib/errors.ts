@@ -24,6 +24,22 @@ export function jsonError(error: unknown) {
       code: "VALIDATION",
     }, { status: 400 });
   }
+  if (isDatabaseError(error)) {
+    logger.error({ error }, "Database unavailable");
+    return Response.json({ error: apiCopy.dbDown, code: "DB_UNAVAILABLE" }, { status: 503 });
+  }
   logger.error({ error }, "Unhandled API error");
   return Response.json({ error: apiCopy.unexpected, code: "INTERNAL" }, { status: 500 });
+}
+
+function isDatabaseError(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const name = "name" in error ? String(error.name) : "";
+  const message = "message" in error ? String(error.message) : "";
+  const code = "code" in error ? String(error.code) : "";
+  return (
+    name.startsWith("PrismaClient") ||
+    code.startsWith("P10") ||
+    /Can't reach database|EAUTHQUERY|authentication failed|FATAL:|ECIRCUITBREAKER/i.test(message)
+  );
 }

@@ -181,6 +181,7 @@ export function statusFr(status: string) {
 export const apiCopy = {
   invalidRequest: "Requête invalide",
   unexpected: "Erreur inattendue du serveur",
+  dbDown: "Le serveur de données ne répond pas. Réessayez dans un instant.",
   badCredentials: "Mauvais email ou mot de passe",
   noWorkspace: "Aucun atelier sur ce compte",
   emailTaken: "Un compte existe déjà avec cet email",

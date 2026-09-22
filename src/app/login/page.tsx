@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BrandMark } from "@/components/brand-mark";
+import { AuthFrame } from "@/components/auth-frame";
 import { readApiJson } from "@/lib/api-json";
 import { studio } from "@/lib/studio-copy";
 
@@ -14,11 +14,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     router.prefetch("/app");
+    router.prefetch("/register");
     const control = new AbortController();
     fetch("/api/me", { signal: control.signal })
       .then((response) => readApiJson<{ user?: unknown }>(response))
       .then((data) => {
-        if (data.user) router.replace("/app");
+        if (data.user) window.location.replace("/app");
       })
       .catch(() => undefined);
     return () => control.abort();
@@ -41,8 +42,7 @@ export default function LoginPage() {
         setPending(false);
         return;
       }
-      router.replace("/app");
-      router.refresh();
+      window.location.assign("/app");
     } catch {
       setError(studio.auth.loginFail);
       setPending(false);
@@ -50,19 +50,51 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="auth-shell">
-      <div className="auth-card">
-      <BrandMark href="/" />
-      <p className="eyebrow mt-10">Connexion</p>
-      <h1 className="mt-4 text-5xl leading-[0.94] md:text-6xl">Bon retour.</h1>
-      <form onSubmit={onSubmit} className="mt-10 space-y-3">
-        <input className="field" name="email" type="email" placeholder={studio.auth.email} required autoComplete="email" />
-        <input className="field" name="password" type="password" placeholder={studio.auth.password} required autoComplete="current-password" />
-        {error ? <p className="text-sm text-red-300">{error}</p> : null}
-        <button className="btn btn-gold w-full" disabled={pending}>{pending ? "Entrée…" : "Entrer"}</button>
+    <AuthFrame
+      eyebrow="Connexion"
+      title="Entrer dans le réseau."
+      lead="Studio IA Tchad · FGI · IGF. Votre booth, N’Djamena."
+      footer={
+        <>
+          Pas encore de booth ? <Link href="/register">Créer un booth</Link>
+        </>
+      }
+    >
+      <form onSubmit={onSubmit} className="auth-form">
+        <label className="field-wrap">
+          <span>{studio.auth.email}</span>
+          <input
+            className="field"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            disabled={pending}
+            suppressHydrationWarning
+          />
+        </label>
+        <label className="field-wrap">
+          <span>{studio.auth.password}</span>
+          <input
+            className="field"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            disabled={pending}
+            suppressHydrationWarning
+          />
+        </label>
+        {error ? (
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <button className="btn btn-gold w-full" disabled={pending}>
+          {pending ? "Entrée…" : "Entrer"}
+        </button>
+        {pending ? <p className="auth-wait">Ouverture de la salle…</p> : null}
       </form>
-      <Link href="/register" className="mt-8 inline-block text-[#edd9a8]">Créer un booth</Link>
-      </div>
-    </main>
+    </AuthFrame>
   );
 }

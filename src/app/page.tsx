@@ -1,99 +1,190 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
-import { CAT_FR } from "@/lib/kiosk-copy";
-import { THEME_LOOK, attractCovers } from "@/lib/theme-look";
+import { HomeLiveStill } from "@/components/home-live-still";
+import { attractCovers } from "@/lib/theme-look";
 
-const worlds = Object.entries(THEME_LOOK);
 const covers = attractCovers();
+const rails = [
+  ["Internet", "Le Tchad rejoint le forum mondial. IGF. Fibre. Souveraineté du réseau."],
+  ["IA", "L’intelligence artificielle au service du développement tchadien."],
+  ["Cyber", "Protéger les données, les institutions, la jeunesse en ligne."],
+  ["École", "Savoir à N’Djamena. Un visage réel dans un monde connecté."],
+] as const;
+const worlds = [
+  ["IA", "Intelligence artificielle", "N’Djamena"],
+  ["Cyber", "Cybersécurité", "Souveraineté"],
+  ["École", "Éducation", "Jeunesse"],
+  ["Réseau", "Internet · IGF", "Connexion"],
+  ["Forum", "Gouvernance", "FGI Tchad"],
+  ["Jeunesse", "Place de la Nation", "N’Djamena"],
+  ["Sahel", "Territoire", "Fibre et soleil"],
+  ["Tchad", "Nation", "10e édition"],
+] as const;
+
+function NetworkField() {
+  return (
+    <div className="home-mesh" aria-hidden="true">
+      <p className="home-watermark">INTERNET</p>
+      <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="fiber" x1="0" y1="0" x2="1" y2="0">
+            <stop stopColor="#7ec8ff" />
+            <stop offset="1" stopColor="#FECB00" />
+          </linearGradient>
+          <radialGradient id="globe" cx="0.55" cy="0.45" r="0.55">
+            <stop stopColor="#7ec8ff" stopOpacity="0.22" />
+            <stop offset="1" stopColor="#7ec8ff" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <ellipse cx="1180" cy="250" rx="320" ry="320" fill="url(#globe)" />
+        <ellipse cx="1180" cy="250" rx="240" ry="240" fill="none" stroke="#7ec8ff" strokeOpacity="0.2" />
+        <ellipse cx="1180" cy="250" rx="168" ry="168" fill="none" stroke="#7ec8ff" strokeOpacity="0.14" />
+        <ellipse cx="1180" cy="250" rx="92" ry="92" fill="none" stroke="#FECB00" strokeOpacity="0.28" />
+        <g className="home-rings" transform="translate(508 648)">
+          <circle r="46" />
+          <circle r="102" />
+          <circle r="168" />
+          <circle r="248" />
+        </g>
+        <path
+          className="home-chad"
+          d="M430 175 C490 155 545 168 560 230 C578 310 585 390 598 470 C612 545 640 600 655 655 C640 710 590 755 530 768 C475 755 445 710 438 650 C428 560 418 470 422 380 C426 290 412 220 430 175 Z"
+        />
+        <g className="home-fibers" fill="none" stroke="url(#fiber)" strokeWidth="1.35">
+          <path d="M508 648 C 680 580, 920 360, 1180 250" />
+          <path d="M508 648 C 740 720, 1020 480, 1260 310" />
+          <path d="M508 648 C 620 420, 860 220, 1100 180" />
+          <path d="M180 120 C 300 260, 400 480, 508 648" />
+          <path d="M80 420 C 220 500, 360 600, 508 648" />
+          <path d="M260 820 C 360 760, 430 700, 508 648" />
+        </g>
+        <g className="home-nodes">
+          <circle cx="508" cy="648" r="6" />
+          <circle cx="1180" cy="250" r="5" />
+          <circle cx="180" cy="120" r="3.5" />
+          <circle cx="80" cy="420" r="3" />
+          <circle cx="260" cy="820" r="3" />
+          <circle cx="740" cy="430" r="3.2" />
+          <circle cx="920" cy="330" r="2.8" />
+          <circle cx="1260" cy="310" r="3" />
+          <circle cx="1100" cy="180" r="2.6" />
+        </g>
+      </svg>
+    </div>
+  );
+}
 
 export default function HomePage() {
-  const [tick, setTick] = useState(0);
-
-  useEffect(() => {
-    const id = window.setInterval(() => setTick((value) => value + 1), 3600);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const featured = covers[tick % Math.max(covers.length, 1)] || worlds[tick % worlds.length];
-
   return (
-    <main>
-      <header className="mx-auto flex max-w-6xl items-start justify-between px-6 pb-4 pt-8">
+    <main className="home">
+      <NetworkField />
+      <span className="home-flag" />
+      <header className="home-bar">
         <BrandMark href="/" />
-        <nav className="flex gap-6 text-[0.95rem] text-[#c6bba8]">
-          <Link href="/login">Connexion</Link>
-          <Link href="/register" className="text-[#edd9a8]">Commencer</Link>
-        </nav>
+        <div className="home-bar-end">
+          <div className="home-partners home-partners-bar">
+            <img src="/brand/fgi-tchad.png" alt="FGI Tchad" />
+            <img src="/brand/igf.webp" alt="Internet Governance Forum" className="home-igf" />
+          </div>
+          <nav>
+            <Link href="/login">Connexion</Link>
+            <Link className="home-nav-go" href="/register">
+              Commencer
+            </Link>
+          </nav>
+        </div>
       </header>
 
-      <section className="relative min-h-[88dvh] overflow-hidden">
-        <div className="attract-stage">
-          {covers.map(([title, look], index) => (
-            look.cover ? <img key={title} src={look.cover} alt="" className="attract-still" data-on={index === tick % covers.length} /> : null
-          ))}
-        </div>
-        <div className="scene-veil" />
-        <div className="relative mx-auto flex min-h-[88dvh] max-w-6xl flex-col justify-end px-6 pb-16">
-          <p className="eyebrow">Photobooth · N’Djamena</p>
-          <h1 className="hero-title mt-6 max-w-3xl text-6xl leading-[0.9] md:text-8xl">Restez ici.<br />Partez en plusieurs.</h1>
-          <p className="mt-7 max-w-lg text-lg leading-8 text-[#e8dfd0]">
-            L’ordinateur est le booth. Le visage reste. Le lieu — gouvernance, Sahel, atelier, XR — change.
+      <section className="home-broadcast">
+        <img
+          src="/themes/fgi-cover.jpg"
+          alt="FGI Tchad, 10e édition. L’intelligence artificielle au service du développement tchadien. 23–24 septembre 2026, N’Djamena."
+        />
+      </section>
+      <p className="home-signal">
+        <b>23–24 sept. 2026</b>
+        <span>N’Djamena</span>
+        <span>IGF</span>
+        <span>Gouvernance de l’internet</span>
+        <span>Fibre · Souveraineté · Réseau</span>
+      </p>
+
+      <section className="home-manifesto">
+        <div className="home-copy">
+          <p className="eyebrow">Forum sur la gouvernance de l’Internet · Tchad</p>
+          <h1>
+            Connecter le Tchad
+            <span>
+              à l’<em>internet</em>.
+            </span>
+          </h1>
+          <p className="home-lead">
+            Photobooth FGI. Votre visage reste. Le réseau change : IA, cyber, école, fibre. Un modèle pour chaque invitée, chaque invité.
           </p>
-          <p className="mt-8 text-sm tracking-[0.16em] uppercase text-[#edd9a8]">{featured ? (featured[1].hint || featured[0]) : ""}</p>
-          <div className="mt-10 flex flex-wrap gap-3">
-            <Link className="btn btn-gold" href="/register">Ouvrir un booth</Link>
-            <Link className="btn btn-ghost" href="/login">J’en ai un</Link>
+          <div className="home-cta">
+            <Link className="btn btn-gold" href="/register">
+              Entrer dans le réseau
+            </Link>
+            <Link className="btn btn-ghost" href="/login">
+              J’ai un booth
+            </Link>
           </div>
         </div>
+        <HomeLiveStill />
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-16 px-6 py-24 md:grid-cols-[1fr_1fr]">
-        <ol className="space-y-10">
-          {[
-            ["Toucher", "L’écran attend. Un tap suffit."],
-            ["Visage", "Un ovale. Un compte. Un flash."],
-            ["Lieu", "Tchad, jeunesse, IA. Le même visage."],
-            ["Garder", "Un cliché, un QR, l’invité suivant."],
-          ].map(([step, line], index) => (
-            <li key={step}>
-              <p className="eyebrow">0{index + 1} · {step}</p>
-              <p className="mt-3 max-w-sm text-xl leading-8 text-[#e8dfd0]">{line}</p>
+      <section className="home-block">
+        <header className="home-head">
+          <p className="eyebrow">Le forum</p>
+          <h2>Quatre fils du réseau.</h2>
+        </header>
+        <ol className="home-rails">
+          {rails.map(([title, line], railIndex) => (
+            <li key={title}>
+              <p className="eyebrow">0{railIndex + 1}</p>
+              <h3>{title}</h3>
+              <p>{line}</p>
             </li>
           ))}
         </ol>
-        <div className="grid grid-cols-2 gap-2 self-start">
-          {covers.slice(0, 8).map(([title, look]) => (
-            <div key={title} className="relative min-h-36 overflow-hidden">
-              {look.cover ? <img src={look.cover} alt="" className="absolute inset-0 h-full w-full object-cover" /> : null}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
-              <p className="relative flex h-full min-h-36 flex-col justify-end p-3 text-sm">
-                <small className="mb-1 block text-[0.62rem] uppercase tracking-[0.16em] text-[#edd9a8]">{look.hint || CAT_FR[look.note] || look.note}</small>
-                {title}
-              </p>
-            </div>
-          ))}
-        </div>
       </section>
-      <section className="mx-auto max-w-6xl px-6 pb-24">
-        <p className="eyebrow">Lieux</p>
-        <h2 className="mt-4 max-w-xl text-4xl leading-[1.05]">Anniversaire. Mariage. Fête. Tchad.</h2>
-        <div className="mt-10 grid grid-cols-2 gap-2 md:grid-cols-4">
-          {worlds.filter(([, look]) => ["Birthday", "Wedding", "Party", "Baby", "Grad"].includes(look.note)).map(([title, look]) => (
-            <div key={title} className="theme-pic relative min-h-40" data-motif={look.motif}>
-              <span className="theme-wash" style={{ background: look.wash }} />
-              <span className="theme-motif" aria-hidden />
-              <span className="theme-veil" />
-              <span className="theme-name">
-                <span>
-                  <small>{CAT_FR[look.note] || look.note}</small>
+
+      <section className="home-block">
+        <header className="home-head">
+          <p className="eyebrow">Mondes</p>
+          <h2>Le visage réel. L’internet tchadien.</h2>
+        </header>
+        <ul className="home-shots">
+          {worlds.map(([title, meaning, place]) => {
+            const look = covers.find(([name]) => name === title)?.[1];
+            return (
+              <li key={title}>
+                <div className="home-shot">{look?.cover ? <img src={look.cover} alt="" /> : null}</div>
+                <p className="home-caption">
                   <b>{title}</b>
-                </span>
-              </span>
-            </div>
-          ))}
+                  <span>{meaning}</span>
+                  <small>{place}</small>
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <section className="home-end">
+        <div className="home-partners">
+          <img src="/brand/fgi-tchad.png" alt="FGI Tchad" />
+          <img src="/brand/igf.webp" alt="Internet Governance Forum" className="home-igf" />
+        </div>
+        <h2>Ouvrir le booth FGI.</h2>
+        <p>10e édition. L’intelligence artificielle au service du développement tchadien.</p>
+        <div className="home-cta">
+          <Link className="btn btn-gold" href="/register">
+            Commencer
+          </Link>
+          <Link className="btn btn-ghost" href="/login">
+            Connexion
+          </Link>
         </div>
       </section>
     </main>

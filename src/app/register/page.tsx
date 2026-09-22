@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BrandMark } from "@/components/brand-mark";
+import { AuthFrame } from "@/components/auth-frame";
 import { readApiJson } from "@/lib/api-json";
 import { studio } from "@/lib/studio-copy";
 
@@ -14,11 +14,12 @@ export default function RegisterPage() {
 
   useEffect(() => {
     router.prefetch("/app");
+    router.prefetch("/login");
     const control = new AbortController();
     fetch("/api/me", { signal: control.signal })
       .then((response) => readApiJson<{ user?: unknown }>(response))
       .then((data) => {
-        if (data.user) router.replace("/app");
+        if (data.user) window.location.replace("/app");
       })
       .catch(() => undefined);
     return () => control.abort();
@@ -46,8 +47,7 @@ export default function RegisterPage() {
         setPending(false);
         return;
       }
-      router.replace("/app");
-      router.refresh();
+      window.location.assign("/app");
     } catch {
       setError(studio.auth.registerFail);
       setPending(false);
@@ -55,21 +55,52 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="auth-shell">
-      <div className="auth-card">
-      <BrandMark href="/" />
-      <p className="eyebrow mt-10">Commencer</p>
-      <h1 className="mt-4 text-5xl leading-[0.94] md:text-6xl">Ouvrir un booth.</h1>
-      <form onSubmit={onSubmit} className="mt-10 space-y-3">
-        <input className="field" name="name" placeholder="Votre nom" required autoComplete="name" />
-        <input className="field" name="workspaceName" placeholder="Nom de l’événement" required />
-        <input className="field" name="email" type="email" placeholder={studio.auth.email} required autoComplete="email" />
-        <input className="field" name="password" type="password" placeholder={studio.auth.passwordNew} required minLength={8} autoComplete="new-password" />
-        {error ? <p className="text-sm text-red-300">{error}</p> : null}
-        <button className="btn btn-gold w-full" disabled={pending}>{pending ? "Ouverture…" : "Ouvrir"}</button>
+    <AuthFrame
+      eyebrow="Commencer"
+      title="Ouvrir le booth FGI."
+      lead="Un compte, un événement, un kiosk. 10e édition — l’IA au service du Tchad."
+      footer={
+        <>
+          J’en ai déjà un. <Link href="/login">Connexion</Link>
+        </>
+      }
+    >
+      <form onSubmit={onSubmit} className="auth-form">
+        <label className="field-wrap">
+          <span>Votre nom</span>
+          <input className="field" name="name" autoComplete="name" required minLength={2} disabled={pending} suppressHydrationWarning />
+        </label>
+        <label className="field-wrap">
+          <span>Nom de l’événement</span>
+          <input className="field" name="workspaceName" required minLength={2} disabled={pending} />
+        </label>
+        <label className="field-wrap">
+          <span>{studio.auth.email}</span>
+          <input className="field" name="email" type="email" autoComplete="email" required disabled={pending} suppressHydrationWarning />
+        </label>
+        <label className="field-wrap">
+          <span>{studio.auth.passwordNew}</span>
+          <input
+            className="field"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            disabled={pending}
+            suppressHydrationWarning
+          />
+        </label>
+        {error ? (
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <button className="btn btn-gold w-full" disabled={pending}>
+          {pending ? "Ouverture…" : "Ouvrir"}
+        </button>
+        {pending ? <p className="auth-wait">Création du booth…</p> : null}
       </form>
-      <Link href="/login" className="mt-8 inline-block text-[#edd9a8]">J’en ai déjà un</Link>
-      </div>
-    </main>
+    </AuthFrame>
   );
 }

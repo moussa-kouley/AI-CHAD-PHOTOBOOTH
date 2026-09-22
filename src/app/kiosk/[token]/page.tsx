@@ -414,10 +414,9 @@ export default function KioskPage() {
                   src={look.cover}
                   alt=""
                   className="attract-still"
-                  data-on={index === still % Math.max(covers.length, 1)}
+                  data-on={index === still % Math.max(covers.length, 1) ? "true" : undefined}
                   loading={index < 2 ? "eager" : "lazy"}
                   decoding="async"
-                  fetchPriority={index === 0 ? "high" : "low"}
                 />
               ) : null,
             )}

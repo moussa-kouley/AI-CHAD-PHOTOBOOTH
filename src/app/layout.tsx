@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
 import { RegisterServiceWorker } from "@/components/register-sw";
 import { BRAND } from "@/lib/brand";
 import "./globals.css";
@@ -75,12 +76,46 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+const STRIP_PREVIEW_ATTRS = `(function(){
+  function wipe(node){
+    if (!node || !node.removeAttribute) return;
+    if (node.hasAttribute && node.hasAttribute("data-cursor-ref")) node.removeAttribute("data-cursor-ref");
+  }
+  function scan(){
+    var nodes = document.querySelectorAll("[data-cursor-ref]");
+    for (var i = 0; i < nodes.length; i++) wipe(nodes[i]);
+  }
+  scan();
+  var obs = new MutationObserver(function(muts){
+    for (var i = 0; i < muts.length; i++) {
+      var m = muts[i];
+      if (m.type === "attributes") wipe(m.target);
+      else if (m.addedNodes) {
+        for (var j = 0; j < m.addedNodes.length; j++) {
+          var n = m.addedNodes[j];
+          wipe(n);
+          if (n && n.querySelectorAll) {
+            var inner = n.querySelectorAll("[data-cursor-ref]");
+            for (var k = 0; k < inner.length; k++) wipe(inner[k]);
+          }
+        }
+      }
+    }
+  });
+  obs.observe(document.documentElement, {subtree:true, childList:true, attributes:true, attributeFilter:["data-cursor-ref"]});
+  function stop(){ try { obs.disconnect(); } catch (e) {} }
+  window.addEventListener("load", function(){ setTimeout(stop, 2000); });
+})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
-      <body className={`${display.variable} ${sans.variable} antialiased`} style={{ fontFamily: 'var(--font-sans), "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif' }}>
+    <html lang="fr" suppressHydrationWarning>
+      <body className={`${display.variable} ${sans.variable} antialiased`} suppressHydrationWarning>
+        <Script id="strip-preview-attrs" strategy="beforeInteractive">
+          {STRIP_PREVIEW_ATTRS}
+        </Script>
         <div className="app-backdrop" aria-hidden="true">
-          <img src="/assets/africa-future-backdrop.webp" alt="" decoding="async" fetchPriority="low" />
+          <img src="/assets/africa-future-backdrop.webp" alt="" decoding="async" />
         </div>
         <RegisterServiceWorker />
         <div className="app-stage">{children}</div>

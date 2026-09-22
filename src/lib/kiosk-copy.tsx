@@ -151,6 +151,14 @@ export const CAT_FR: Record<string, string> = {
   "N’Djamena": "N’Djamena",
   "N'Djamena": "N’Djamena",
   Forum: "Forum",
+  FGI: "FGI",
+  Cybersécurité: "Cybersécurité",
+  Éducation: "Éducation",
+  Gouvernance: "Gouvernance",
+  Jeunesse: "Jeunesse",
+  Cyber: "Cybersécurité",
+  École: "Éducation",
+  Réseau: "Réseau",
 };
 
 /** French is the guest language. English sits underneath. */
@@ -172,7 +180,7 @@ export function KioskSteps({ at, done }: { at: 1 | 2 | 3; done?: boolean }) {
   return (
     <ol className="kiosk-steps" aria-label="Étapes">
       {items.map((item) => (
-        <li key={item.n} data-on={!done && at === item.n} data-done={done || at > item.n}>
+        <li key={item.n} data-on={!done && at === item.n ? "true" : undefined} data-done={done || at > item.n ? "true" : undefined}>
           <b>{item.n}</b>
           <span>{item.fr}</span>
         </li>

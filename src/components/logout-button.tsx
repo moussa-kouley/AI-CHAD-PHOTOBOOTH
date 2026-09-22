@@ -1,14 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { studio } from "@/lib/studio-copy";
 
 export function LogoutButton() {
-  const router = useRouter();
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.replace("/login");
-    router.refresh();
+    window.location.assign("/login");
   }
 
   return (

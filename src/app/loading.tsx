@@ -1,5 +1,5 @@
 import { BootScreen } from "@/components/boot-screen";
 
 export default function Loading() {
-  return <BootScreen label="Entrée…" />;
+  return <BootScreen label="Connexion au réseau…" />;
 }

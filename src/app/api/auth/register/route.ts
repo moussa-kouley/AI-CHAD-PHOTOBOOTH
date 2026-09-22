@@ -4,7 +4,7 @@ import { createSession, hashPassword } from "@/lib/auth";
 import { registerSchema } from "@/lib/validators";
 import { jsonError, AppError } from "@/lib/errors";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
-import { ensureSystemPrompts } from "@/lib/prompt-sync";
+import { ensureSystemPromptsIfEmpty } from "@/lib/prompt-sync";
 import { apiCopy, studio } from "@/lib/studio-copy";
 
 export async function POST(request: Request) {
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       },
     });
 
-    await ensureSystemPrompts();
+    await ensureSystemPromptsIfEmpty();
 
     await prisma.photobooth.create({
       data: {
