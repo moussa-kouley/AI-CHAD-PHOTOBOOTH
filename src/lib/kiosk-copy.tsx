@@ -154,8 +154,6 @@ export const CAT_FR: Record<string, string> = {
   FGI: "FGI",
   Cybersécurité: "Cybersécurité",
   Éducation: "Éducation",
-  Gouvernance: "Gouvernance",
-  Jeunesse: "Jeunesse",
   Cyber: "Cybersécurité",
   École: "Éducation",
   Réseau: "Réseau",
