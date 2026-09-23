@@ -8,7 +8,7 @@ import { DevelopingStage } from "@/components/developing-stage";
 import { Pair, KioskSteps, copy } from "@/lib/kiosk-copy";
 import { statusFr } from "@/lib/studio-copy";
 import { openFramedImage, saveFramedImage, shareFramedImage } from "@/lib/keep-file";
-import { FILM_FILENAME, SOCIAL_FILENAME } from "@/lib/social";
+import { FILM_FILENAME, SOCIAL_FILENAME, keepPortraitPath } from "@/lib/social";
 import { BRAND } from "@/lib/brand";
 import { useSwipe } from "@/lib/swipe";
 import { readApiJson } from "@/lib/api-json";
@@ -32,6 +32,10 @@ type Session = {
 
 function souvenirUrl(token: string) {
   return new URL(`/s/${token}`, window.location.origin).href;
+}
+
+function portraitKeepUrl(token: string, generationId: string) {
+  return new URL(keepPortraitPath(token, generationId), window.location.origin).href;
 }
 
 function useDesk() {
@@ -80,17 +84,6 @@ export default function SharePage() {
     };
   }, [token]);
 
-  useEffect(() => {
-    const url = souvenirUrl(token);
-    setShareUrl(url);
-    QRCode.toDataURL(url, {
-      width: 520,
-      margin: 1,
-      errorCorrectionLevel: "M",
-      color: { dark: "#111111", light: "#ffffff" },
-    }).then(setQr);
-  }, [token]);
-
   const photos = session?.generations.filter((item) => item.kind === "photo") || [];
   const video = session?.generations.find((item) => item.kind === "video");
   const current = photos[active] || photos[0];
@@ -100,10 +93,26 @@ export default function SharePage() {
   const filmDownload = video?.video ? `${video.video}?download=1&name=${FILM_FILENAME}` : "";
 
   useEffect(() => {
+    const url = current?.id ? portraitKeepUrl(token, current.id) : souvenirUrl(token);
+    setShareUrl(url);
+    QRCode.toDataURL(url, {
+      width: 640,
+      margin: 1,
+      errorCorrectionLevel: "M",
+      color: { dark: "#111111", light: "#ffffff" },
+    }).then(setQr);
+  }, [token, current?.id]);
+
+  useEffect(() => {
     if (photos[active]?.image) return;
     const first = photos.findIndex((item) => item.image);
     if (first >= 0) setActive(first);
   }, [photos, active]);
+
+  useEffect(() => {
+    if (!current?.image) return;
+    document.querySelector(".print-sheet")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [current?.image]);
 
   const swipe = useSwipe(
     () => setActive((value) => Math.min(photos.length - 1, value + 1)),
@@ -173,7 +182,7 @@ export default function SharePage() {
   }
 
   return (
-    <main className="souvenir mx-auto min-h-dvh max-w-lg pb-36" data-desk={desk}>
+    <main className="souvenir mx-auto min-h-dvh max-w-lg pb-10" data-desk={desk}>
       <header className="no-print flex items-end justify-between px-5 pt-6">
         <div>
           <KioskSteps at={3} done={Boolean(current?.image)} />
@@ -217,29 +226,33 @@ export default function SharePage() {
 
       {current?.image ? (
         <div className="no-print souvenir-actions mt-5 px-5">
-          {desk ? (
-            <figure className="souvenir-qr">
-              {qr ? <img src={qr} alt={copy.souvenirQr.fr} /> : null}
-              <figcaption>
-                <Pair en={copy.scanKeep.en} fr={copy.scanKeep.fr} />
-              </figcaption>
-            </figure>
-          ) : (
+          <figure className="souvenir-qr">
+            {qr ? <img src={qr} alt={copy.souvenirQr.fr} /> : null}
+            <figcaption>
+              <Pair en={copy.scanKeep.en} fr={copy.scanKeep.fr} />
+            </figcaption>
+          </figure>
+          {session?.kioskPath ? (
+            <Link className="btn btn-gold camera-ready w-full souvenir-next" href={session.kioskPath.includes("fgi2026") ? "/#mondes" : session.kioskPath}>
+              <Pair en={copy.next.en} fr={copy.next.fr} />
+            </Link>
+          ) : null}
+          {!desk ? (
             <>
-              <button className="btn btn-gold camera-ready w-full" type="button" disabled={keeping} onClick={() => void keepPrint()}>
-                <Pair en={copy.keep.en} fr={copy.keep.fr} />
+              <button className="btn btn-ghost camera-ready w-full" type="button" disabled={keeping} onClick={() => void keepPrint()}>
+                <Pair en={copy.keepPhone.en} fr={copy.keepPhone.fr} />
               </button>
               <button className="btn btn-ghost camera-ready w-full" type="button" disabled={sharing} onClick={() => void sharePrint()}>
                 <Pair en={copy.shareFile.en} fr={copy.shareFile.fr} />
               </button>
-              <a className="btn btn-ghost w-full" href={current.image} target="_blank" rel="noopener noreferrer">
-                <Pair en={copy.openImage.en} fr={copy.openImage.fr} />
+              <a className="btn btn-ghost w-full" href={downloadUrl} download={SOCIAL_FILENAME}>
+                <Pair en={copy.keep.en} fr={copy.keep.fr} />
               </a>
               <p className="souvenir-hold">
                 <Pair en={copy.holdSave.en} fr={copy.holdSave.fr} />
               </p>
             </>
-          )}
+          ) : null}
           <form onSubmit={sendEmail} className="souvenir-mail">
             <input className="field" type="email" required placeholder={copy.email.fr} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
             <button className="btn btn-gold camera-ready w-full" type="submit">
@@ -291,14 +304,6 @@ export default function SharePage() {
         <p className="no-print mt-6 px-5 text-sm text-[#9c9588]">
           {video.status === "failed" ? video.error || copy.filmMiss.fr : copy.filmSoon.fr}
         </p>
-      ) : null}
-
-      {session?.kioskPath && current?.image ? (
-        <div className="no-print dock px-5">
-          <Link className="btn btn-ghost w-full" href={session.kioskPath}>
-            <Pair en={copy.next.en} fr={copy.next.fr} />
-          </Link>
-        </div>
       ) : null}
     </main>
   );

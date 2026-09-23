@@ -244,9 +244,9 @@ export async function stampOnePrint(sessionId: string, generationId: string) {
     include: { booth: true, generations: true },
   });
   const brand = parseBrand(session.booth.brand);
-  const shareUrl = `${env.APP_URL}/s/${session.shareToken}`;
   const generation = session.generations.find((item) => item.id === generationId);
   if (!generation?.outputPath) return;
+  const shareUrl = `${env.APP_URL.replace(/\/$/, "")}/s/${session.shareToken}/keep/${generation.id}`;
   const buffer = await readStored(generation.outputPath);
   const branded = await composeBrandedStill(buffer, brand, shareUrl, {
     themeTitle: generation.promptTitle,

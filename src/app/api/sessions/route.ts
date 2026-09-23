@@ -10,6 +10,9 @@ import { enqueueJob, processDueJobs } from "@/lib/jobs";
 import { env } from "@/lib/env";
 import { serializeSession } from "@/lib/session-dto";
 import { apiCopy } from "@/lib/studio-copy";
+import { ensureEventBooth } from "@/lib/event-booth";
+import { EVENT_PUBLIC_TOKEN } from "@/lib/fgi-agenda";
+import { ensureSystemPrompts } from "@/lib/prompt-sync";
 
 function parsePromptIds(form: FormData) {
   const raw = form.get("promptIds");
@@ -23,6 +26,27 @@ function parsePromptIds(form: FormData) {
   }
   const single = form.get("promptId");
   return typeof single === "string" && single ? [single] : [];
+}
+
+async function resolveLooks(ids: string[]) {
+  const unique = ids.map((item) => item.trim()).filter(Boolean);
+  if (!unique.length) return [];
+  const match = (rows: Awaited<ReturnType<typeof prisma.prompt.findMany>>) =>
+    unique
+      .map((id) => rows.find((row) => row.id === id || row.title.toLowerCase() === id.toLowerCase()))
+      .filter((row): row is (typeof rows)[number] => Boolean(row));
+
+  let rows = await prisma.prompt.findMany({
+    where: { OR: [{ id: { in: unique } }, { title: { in: unique } }] },
+  });
+  let ordered = match(rows);
+  if (ordered.length) return ordered;
+
+  await ensureSystemPrompts();
+  rows = await prisma.prompt.findMany({
+    where: { OR: [{ id: { in: unique } }, { title: { in: unique } }] },
+  });
+  return match(rows);
 }
 
 export async function POST(request: Request) {
@@ -43,6 +67,9 @@ export async function POST(request: Request) {
     const file = form.get("photo");
     if (!(file instanceof File)) throw new AppError(400, apiCopy.photoRequired, "NO_PHOTO");
 
+    if (parsed.boothToken === EVENT_PUBLIC_TOKEN) {
+      await ensureEventBooth();
+    }
     const booth = await prisma.photobooth.findUnique({ where: { publicToken: parsed.boothToken } });
     if (!booth || !booth.isActive) throw new AppError(404, apiCopy.boothUnavailable, "BOOTH_OFFLINE");
 
@@ -57,9 +84,8 @@ export async function POST(request: Request) {
     }
 
     const ids = [...new Set(parsed.promptIds?.length ? parsed.promptIds : parsed.promptId ? [parsed.promptId] : [])].slice(0, 3);
-    const prompts = await prisma.prompt.findMany({ where: { id: { in: ids } } });
-    if (!prompts.length) throw new AppError(400, apiCopy.unknownStyle, "BAD_PROMPT");
-    const ordered = ids.map((id) => prompts.find((prompt) => prompt.id === id)).filter(Boolean) as typeof prompts;
+    const ordered = await resolveLooks(ids);
+    if (!ordered.length) throw new AppError(400, apiCopy.unknownStyle, "BAD_PROMPT");
 
     const upload = await saveUpload(file, "uploads");
     const publicImageUrl = `${env.APP_URL}/api/media/${upload.relative}`;

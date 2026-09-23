@@ -2,14 +2,15 @@ import { prisma } from "@/lib/db";
 import { AppError, jsonError } from "@/lib/errors";
 import { publish, subscribe, type LensPacket, type LensRole } from "@/lib/lens-hub";
 import { apiCopy } from "@/lib/studio-copy";
+import { EVENT_PUBLIC_TOKEN } from "@/lib/fgi-agenda";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 async function boothOrThrow(token: string) {
+  if (token === EVENT_PUBLIC_TOKEN) return;
   const booth = await prisma.photobooth.findUnique({ where: { publicToken: token } });
   if (!booth || !booth.isActive) throw new AppError(404, apiCopy.boothOffline, "BOOTH_OFFLINE");
-  return booth;
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ token: string }> }) {

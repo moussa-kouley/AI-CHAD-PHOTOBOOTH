@@ -27,7 +27,7 @@ export const boothSchema = z.object({
 });
 
 export const guestSessionSchema = z.object({
-  boothToken: z.string().min(8),
+  boothToken: z.string().min(6).max(64),
   promptId: z.string().optional(),
   promptIds: z.array(z.string().min(1)).min(1).max(3).optional(),
   wantVideo: z.boolean().default(false),

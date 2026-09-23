@@ -5,6 +5,10 @@ export const SOCIAL_RATIO = SOCIAL_W / SOCIAL_H;
 export const SOCIAL_FILENAME = "chad-ai-portrait.jpg";
 export const FILM_FILENAME = "chad-ai-film.mp4";
 
+export function keepPortraitPath(shareToken: string, generationId: string) {
+  return `/s/${shareToken}/keep/${generationId}`;
+}
+
 export function souvenirFilename(ext: string, given?: string | null) {
   const clean = (given || "").split(/[/\\]/).pop() || "";
   const safe = clean.replace(/[^\w.-]/g, "");

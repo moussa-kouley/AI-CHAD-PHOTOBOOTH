@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { BootScreen } from "@/components/boot-screen";
 import QRCode from "qrcode";
 import { compressPortrait, flushQueue, guestPhotoFilename, listQueue, queueCapture } from "@/lib/offline-queue";
 import { ThemePicker } from "@/components/theme-picker";
@@ -13,6 +14,7 @@ import { snapPortrait } from "@/lib/snap";
 import { useBoothLens } from "@/lib/use-booth-lens";
 import { cameraConstraints } from "@/lib/camera";
 import { attractCovers } from "@/lib/theme-look";
+import { EVENT_PUBLIC_TOKEN, eventGuestBooth, eventGuestPrompts, eventTemplateByLook } from "@/lib/fgi-agenda";
 import { readApiJson } from "@/lib/api-json";
 
 type Prompt = { id: string; title: string; category: string; scope?: string; body?: string };
@@ -30,15 +32,31 @@ type Booth = {
 
 type Step = "attract" | "camera" | "review" | "format" | "style" | "sending" | "queued";
 
+const EVENT_PROMPTS = eventGuestPrompts();
+const EVENT_BOOTH = eventGuestBooth();
+
 export default function KioskPage() {
+  return (
+    <Suspense fallback={<BootScreen label="Booth…" />}>
+      <KioskDesk />
+    </Suspense>
+  );
+}
+
+function KioskDesk() {
   const { token } = useParams<{ token: string }>();
   const router = useRouter();
+  const search = useSearchParams();
+  const lookName = (search.get("look") || "").trim();
+  const eventLook = eventTemplateByLook(lookName);
+  const isEvent = token === EVENT_PUBLIC_TOKEN;
+  const lookLocked = Boolean(eventLook);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [booth, setBooth] = useState<Booth | null>(null);
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [step, setStep] = useState<Step>("attract");
-  const [selected, setSelected] = useState<string[]>([]);
+  const [booth, setBooth] = useState<Booth | null>(isEvent ? EVENT_BOOTH : null);
+  const [prompts, setPrompts] = useState<Prompt[]>(isEvent ? EVENT_PROMPTS : []);
+  const [step, setStep] = useState<Step>(lookLocked ? "camera" : "attract");
+  const [selected, setSelected] = useState<string[]>(eventLook ? [eventLook.look] : []);
   const [wantVideo, setWantVideo] = useState(false);
   const [email, setEmail] = useState("");
   const [blob, setBlob] = useState<Blob | null>(null);
@@ -49,7 +67,7 @@ export default function KioskPage() {
   const [facing, setFacing] = useState<"user" | "environment">("user");
   const [count, setCount] = useState<number | null>(null);
   const [flash, setFlash] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isEvent);
   const [idle, setIdle] = useState(0);
   const [lensQr, setLensQr] = useState("");
   const [askLens, setAskLens] = useState(false);
@@ -59,7 +77,7 @@ export default function KioskPage() {
   const [still, setStill] = useState(0);
   const [operator, setOperator] = useState(false);
   const [fromLibrary, setFromLibrary] = useState(false);
-  const lens = useBoothLens(token, videoRef);
+  const lens = useBoothLens(step === "camera" ? token : undefined, videoRef);
   const viewFacing = lens.live ? lens.facing : facing;
   const lensOpen = camReady || lens.live;
   const counting = count !== null;
@@ -86,23 +104,44 @@ export default function KioskPage() {
   }, []);
 
   useEffect(() => {
-    fetch(`/api/booths/public/${token}`)
+    const control = new AbortController();
+    fetch(`/api/booths/public/${token}`, { signal: control.signal })
       .then(async (response) => {
         const data = await readApiJson<{ booth?: Booth; prompts?: Prompt[]; error?: string }>(response);
         if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : copy.boothDown.fr);
         if (!data.booth) throw new Error(copy.boothDown.fr);
         setBooth(data.booth);
-        setPrompts(data.prompts || []);
-        setSelected(data.booth.promptMode === "automatic" ? (data.prompts || []).slice(0, 1).map((item) => item.id) : []);
+        const nextPrompts = data.prompts?.length ? data.prompts : isEvent ? EVENT_PROMPTS : [];
+        setPrompts(nextPrompts);
+        const locked = lookName
+          ? nextPrompts.find((item) => item.title.toLowerCase() === lookName.toLowerCase() || item.id.toLowerCase() === lookName.toLowerCase())
+          : undefined;
+        setSelected(
+          locked
+            ? [locked.id]
+            : lookLocked && lookName
+              ? [lookName]
+              : data.booth.promptMode === "automatic"
+                ? nextPrompts.slice(0, 1).map((item) => item.id)
+                : [],
+        );
         setWantVideo(false);
+        setError("");
       })
-      .catch((err) => setError(err.message))
+      .catch((err) => {
+        if (control.signal.aborted) return;
+        if (isEvent) return;
+        setError(err.message);
+      })
       .finally(() => setLoading(false));
-    fetch("/api/me", { credentials: "same-origin" })
-      .then((response) => readApiJson<{ user?: unknown }>(response))
-      .then((data) => setOperator(Boolean(data.user)))
-      .catch(() => setOperator(false));
-  }, [token]);
+    if (!isEvent) {
+      fetch("/api/me", { credentials: "same-origin", signal: control.signal })
+        .then((response) => readApiJson<{ user?: unknown }>(response))
+        .then((data) => setOperator(Boolean(data.user)))
+        .catch(() => setOperator(false));
+    }
+    return () => control.abort();
+  }, [token, lookName, isEvent, lookLocked]);
 
   useEffect(() => {
     if (!askLens) return;
@@ -196,12 +235,14 @@ export default function KioskPage() {
 
   const make = copy.make(selected.length);
 
+  const lookCap = isEvent ? 1 : 3;
+
   function toggleTheme(id: string) {
     poke();
     pulse("tap");
     setSelected((current) => {
       if (current.includes(id)) return current.filter((item) => item !== id);
-      if (current.length >= 3) return current;
+      if (current.length >= lookCap) return isEvent ? [id] : current;
       return [...current, id];
     });
   }
@@ -214,10 +255,10 @@ export default function KioskPage() {
       const pool = unused.length ? unused : prompts;
       if (!pool.length) return current;
       if (!current.length) {
-        const mix = [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(2, pool.length));
+        const mix = [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(lookCap, pool.length));
         return mix.map((item) => item.id);
       }
-      if (current.length >= 3) return current;
+      if (current.length >= lookCap) return current;
       const pick = pool[Math.floor(Math.random() * pool.length)];
       return pick ? [...current, pick.id] : current;
     });
@@ -263,7 +304,7 @@ export default function KioskPage() {
     for (const value of [3, 2, 1]) {
       setCount(value);
       pulse("count");
-      await new Promise((resolve) => window.setTimeout(resolve, 800));
+      await new Promise((resolve) => window.setTimeout(resolve, 450));
       if (captureRound.current !== round) return;
     }
     setCount(null);
@@ -281,8 +322,13 @@ export default function KioskPage() {
 
   function continueAfterPhoto(film = wantVideo) {
     setWantVideo(film);
-    if (booth?.promptMode === "automatic") {
-      const ids = selected.length ? selected : prompts.slice(0, 1).map((item) => item.id);
+    const locked =
+      lookName
+        ? prompts.find((item) => item.title.toLowerCase() === lookName.toLowerCase() || item.id.toLowerCase() === lookName.toLowerCase())
+        : undefined;
+    const lockedId = locked?.id || (lookLocked ? lookName : "");
+    if (lockedId || booth?.promptMode === "automatic") {
+      const ids = lockedId ? [lockedId] : selected.length ? selected : prompts.slice(0, 1).map((item) => item.id);
       if (!ids.length) {
         setError(copy.noPlaceOpen.fr);
         return;
@@ -296,7 +342,7 @@ export default function KioskPage() {
 
   function acceptPhoto() {
     poke();
-    if (booth?.videoEnabled) {
+    if (booth?.videoEnabled && !lookLocked) {
       setStep("format");
       return;
     }
@@ -325,12 +371,12 @@ export default function KioskPage() {
     const picks = looks || selected;
     if (!source || picks.length === 0) {
       setError(copy.tapPlace.fr);
-      setStep("style");
+      setStep(lookLocked ? "review" : "style");
       return;
     }
     if (booth?.deliveryMode === "email" && !email) {
       setError(copy.needEmail.fr);
-      setStep("style");
+      setStep(lookLocked ? "review" : "style");
       return;
     }
     setError("");
@@ -352,7 +398,7 @@ export default function KioskPage() {
       if (!response.ok) {
         if (response.status >= 500) throw new Error("weak-network");
         setError(response.status === 402 ? copy.noLooks.fr : data.error || copy.boothStartFail.fr);
-        setStep("style");
+        setStep(lookLocked ? "review" : "style");
         return;
       }
       router.push(data.session.sharePath);
@@ -407,14 +453,14 @@ export default function KioskPage() {
       {step === "attract" ? (
         <section className="relative min-h-dvh overflow-hidden">
           <div className="attract-stage">
-            {covers.map(([name, look], index) =>
+            {(eventLook?.cover ? [["look", { cover: eventLook.cover }]] as const : covers).map(([name, look], index) =>
               look.cover ? (
                 <img
                   key={name}
                   src={look.cover}
                   alt=""
                   className="attract-still"
-                  data-on={index === still % Math.max(covers.length, 1) ? "true" : undefined}
+                  data-on={eventLook || index === still % Math.max(covers.length, 1) ? "true" : undefined}
                   loading={index < 2 ? "eager" : "lazy"}
                   decoding="async"
                 />
@@ -436,10 +482,12 @@ export default function KioskPage() {
                   <span>{BRAND.name}</span>
                 </div>
               </div>
-              <p className="eyebrow">{copy.attractHint.fr}</p>
-              <h1 className="hero-title attract-title">{title}</h1>
+              <p className="eyebrow">{eventLook ? eventLook.topic : copy.attractHint.fr}</p>
+              <h1 className="hero-title attract-title">{eventLook ? eventLook.title : title}</h1>
               <PathWhisper className="path-whisper-desk" />
-              <p className="attract-line">{guestSubtitle(booth?.subtitle)}</p>
+              <p className="attract-line">
+                {eventLook ? "Votre visage reste. Ce monde du forum change autour de vous." : guestSubtitle(booth?.subtitle)}
+              </p>
               <p className="pair-fr attract-line-en">{copy.defaultSubtitle.en}</p>
               <div className="attract-cta">
                 <button className="btn btn-gold attract-door" type="button" disabled={loading} onClick={() => { void goBright(); setError(""); setCamDenied(false); setFromLibrary(false); setStep("camera"); }}>
@@ -447,6 +495,11 @@ export default function KioskPage() {
                 </button>
                 {filePick("btn btn-ghost attract-door relative cursor-pointer overflow-hidden", <Pair en={copy.library.en} fr={copy.library.fr} />, loading)}
               </div>
+              {eventLook ? (
+                <a className="attract-change" href="/#mondes">
+                  Changer de monde
+                </a>
+              ) : null}
             </div>
           </div>
         </section>
@@ -603,7 +656,7 @@ export default function KioskPage() {
             <KioskSteps at={2} />
             <div className="mt-5 flex items-end justify-between gap-4">
               <div>
-                <p className="eyebrow">{copy.room(selected.length, 3).fr}</p>
+                <p className="eyebrow">{copy.room(selected.length, lookCap).fr}</p>
                 <h1 className="mt-3 text-4xl">{copy.pick.fr}</h1>
                 <p className="pair-fr mt-2">{copy.pick.en}</p>
               </div>
@@ -618,7 +671,7 @@ export default function KioskPage() {
             </div>
           </header>
           <div className="kiosk-desk-scroll">
-            <ThemePicker prompts={prompts} selected={selected} onToggle={toggleTheme} guest max={3} />
+            <ThemePicker prompts={prompts} selected={selected} onToggle={toggleTheme} guest max={lookCap} />
             <input className="field mt-3" type="email" placeholder={copy.email.fr} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
           </div>
           <div className="kiosk-desk-dock">
@@ -642,8 +695,9 @@ export default function KioskPage() {
       ) : null}
 
       {step === "queued" ? (
-        <section className="kiosk-panel kiosk-fill justify-end px-5 pb-10">
+        <section className="kiosk-panel kiosk-fill px-5 pb-10">
           <KioskSteps at={3} />
+          {preview ? <img src={preview} alt="" className="souvenir-still mt-6" /> : null}
           <p className="eyebrow mt-6">{copy.holding.fr}</p>
           <h1 className="mt-4 text-5xl">{copy.queued.fr}</h1>
           <p className="pair-fr mt-3">{copy.queued.en}</p>

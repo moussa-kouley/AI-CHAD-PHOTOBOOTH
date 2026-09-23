@@ -24,10 +24,8 @@ export function ThemePicker({ prompts, selected, onToggle, onRemove, focus, max,
     return [...ordered, ...[...seen].filter((name) => !ordered.includes(name))];
   }, [prompts]);
   const [open, setOpen] = useState(() => {
+    if (guest) return "All";
     if (focus) return categoryLabel(focus);
-    if (guest && prompts.some((item) => categoryLabel(item.category) === "Horizon")) return "Horizon";
-    if (guest && prompts.some((item) => categoryLabel(item.category) === "XR")) return "XR";
-    if (guest && prompts.some((item) => categoryLabel(item.category) === "Atelier")) return "Atelier";
     return "All";
   });
   const [query, setQuery] = useState("");

@@ -1,25 +1,13 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { HomeLiveStill } from "@/components/home-live-still";
-import { FGI_DAY1_MODERATOR, FGI_OPENING, FGI_PANELS, FGI_WORKSHOPS } from "@/lib/fgi-agenda";
-import { attractCovers } from "@/lib/theme-look";
+import { EVENT_PUBLIC_TOKEN, EVENT_TEMPLATES, FGI_DAY1_MODERATOR, FGI_OPENING, FGI_PANELS, FGI_WORKSHOPS } from "@/lib/fgi-agenda";
 
-const covers = attractCovers();
 const rails = [
   ["Internet", "Le Tchad rejoint le forum mondial. IGF. Fibre. Souveraineté du réseau."],
   ["IA", "L’intelligence artificielle au service du développement tchadien."],
   ["Cyber", "Protéger les données, les institutions, la jeunesse en ligne."],
   ["École", "Savoir à N’Djamena. Un visage réel dans un monde connecté."],
-] as const;
-const worlds = [
-  ["IA", "Intelligence artificielle", "N’Djamena"],
-  ["Cyber", "Cybersécurité", "Souveraineté"],
-  ["École", "Éducation", "Jeunesse"],
-  ["Réseau", "Internet · IGF", "Connexion"],
-  ["Forum", "Gouvernance", "FGI Tchad"],
-  ["Jeunesse", "Place de la Nation", "N’Djamena"],
-  ["Sahel", "Territoire", "Fibre et soleil"],
-  ["Tchad", "Nation", "10e édition"],
 ] as const;
 
 function NetworkField() {
@@ -88,11 +76,8 @@ export default function HomePage() {
             <img src="/brand/igf.webp" alt="Internet Governance Forum" className="home-igf" />
           </div>
           <nav>
+            <a href="#mondes">Booth</a>
             <a href="#agenda">Agenda</a>
-            <Link href="/login">Connexion</Link>
-            <Link className="home-nav-go" href="/register">
-              Commencer
-            </Link>
           </nav>
         </div>
       </header>
@@ -121,18 +106,41 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="home-lead">
-            Photobooth FGI. Votre visage reste. Le réseau change : IA, cyber, école, fibre. Un modèle pour chaque invitée, chaque invité.
+            Choisissez un monde du forum. Votre visage reste. Le réseau change : IA, cyber, école, fibre, santé.
           </p>
           <div className="home-cta">
-            <Link className="btn btn-gold" href="/register">
-              Entrer dans le réseau
-            </Link>
-            <Link className="btn btn-ghost" href="/login">
-              J’ai un booth
-            </Link>
+            <a className="btn btn-gold" href="#mondes">
+              Choisir un monde
+            </a>
+            <a className="btn btn-ghost" href="#agenda">
+              Voir l’agenda
+            </a>
           </div>
         </div>
         <HomeLiveStill />
+      </section>
+
+      <section className="home-block home-mondes" id="mondes">
+        <header className="home-head">
+          <p className="eyebrow">Booth FGI</p>
+          <h2>Choisissez votre monde.</h2>
+        </header>
+        <ul className="home-shots">
+          {EVENT_TEMPLATES.map((item) => (
+            <li key={item.slug}>
+              <Link className="home-shot-link" href={`/kiosk/${EVENT_PUBLIC_TOKEN}?look=${encodeURIComponent(item.look)}`}>
+                <div className="home-shot">
+                  <img src={item.cover} alt="" />
+                  <p className="home-caption">
+                    <b>{item.title}</b>
+                    <span>{item.topic}</span>
+                    <small>Photographier</small>
+                  </p>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="home-block home-agenda" id="agenda">
@@ -207,42 +215,20 @@ export default function HomePage() {
         </ol>
       </section>
 
-      <section className="home-block">
-        <header className="home-head">
-          <p className="eyebrow">Mondes</p>
-          <h2>Le visage réel. L’internet tchadien.</h2>
-        </header>
-        <ul className="home-shots">
-          {worlds.map(([title, meaning, place]) => {
-            const look = covers.find(([name]) => name === title)?.[1];
-            return (
-              <li key={title}>
-                <div className="home-shot">{look?.cover ? <img src={look.cover} alt="" /> : null}</div>
-                <p className="home-caption">
-                  <b>{title}</b>
-                  <span>{meaning}</span>
-                  <small>{place}</small>
-                </p>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
       <section className="home-end">
         <div className="home-partners">
           <img src="/brand/fgi-tchad.png" alt="FGI Tchad" />
           <img src="/brand/igf.webp" alt="Internet Governance Forum" className="home-igf" />
         </div>
-        <h2>Ouvrir le booth FGI.</h2>
-        <p>10e édition. L’intelligence artificielle au service du développement tchadien.</p>
+        <h2>Entrer dans le booth FGI.</h2>
+        <p>10e édition. Choisissez un thème, prenez la photo. Pas de compte.</p>
         <div className="home-cta">
-          <Link className="btn btn-gold" href="/register">
-            Commencer
-          </Link>
-          <Link className="btn btn-ghost" href="/login">
-            Connexion
-          </Link>
+          <a className="btn btn-gold" href="#mondes">
+            Choisir un monde
+          </a>
+          <a className="btn btn-ghost" href="#agenda">
+            Agenda
+          </a>
         </div>
       </section>
     </main>

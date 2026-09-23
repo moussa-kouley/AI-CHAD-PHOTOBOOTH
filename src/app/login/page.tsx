@@ -14,7 +14,6 @@ export default function LoginPage() {
 
   useEffect(() => {
     router.prefetch("/app");
-    router.prefetch("/register");
     const control = new AbortController();
     fetch("/api/me", { signal: control.signal })
       .then((response) => readApiJson<{ user?: unknown }>(response))
@@ -53,10 +52,10 @@ export default function LoginPage() {
     <AuthFrame
       eyebrow="Connexion"
       title="Entrer dans le réseau."
-      lead="Studio IA Tchad · FGI · IGF. Votre booth, N’Djamena."
+      lead="Réservé à l’équipe du booth. Les invités choisissent un monde sur la page d’accueil."
       footer={
         <>
-          Pas encore de booth ? <Link href="/register">Créer un booth</Link>
+          Invité du forum ? <Link href="/#mondes">Choisir un monde</Link>
         </>
       }
     >
