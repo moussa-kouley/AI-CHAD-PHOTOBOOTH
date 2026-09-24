@@ -6,6 +6,7 @@ import QRCode from "qrcode";
 import { FRAME_ALIASES, type FrameId } from "./frames";
 import { type BrandKit } from "./brand-schema";
 import { containStill } from "./contain-still";
+import { composeFgiPoster } from "./fgi-poster";
 import { SOCIAL_H, SOCIAL_W } from "./social";
 import { BRAND } from "./brand";
 
@@ -36,7 +37,7 @@ function clip(value: string, max: number) {
 }
 
 function resolveFrame(frame: string): FrameId {
-  if (frame === "strip" || frame === "sparkle" || frame === "brand" || frame === "instant" || frame === "held") {
+  if (frame === "strip" || frame === "sparkle" || frame === "brand" || frame === "instant" || frame === "held" || frame === "poster") {
     return frame;
   }
   return FRAME_ALIASES[frame] || "strip";
@@ -308,6 +309,9 @@ export async function composeBrandedStill(
 ) {
   const frame = resolveFrame(brand.frame);
   const gold = hex(brand.primary);
+  if (frame === "poster") {
+    return composeFgiPoster(input, shareUrl);
+  }
   if (frame === "sparkle") {
     return composeSocial(input, brand, shareUrl, extras, {
       paper: "#070708",

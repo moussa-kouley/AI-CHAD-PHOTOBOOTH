@@ -233,7 +233,7 @@ export default function SharePage() {
             </figcaption>
           </figure>
           {session?.kioskPath ? (
-            <Link className="btn btn-gold camera-ready w-full souvenir-next" href={session.kioskPath.includes("fgi2026") ? "/#mondes" : session.kioskPath}>
+            <Link className="btn btn-gold camera-ready w-full souvenir-next" href={session.kioskPath?.includes("fgi2026") ? "/#mondes" : session.kioskPath}>
               <Pair en={copy.next.en} fr={copy.next.fr} />
             </Link>
           ) : null}

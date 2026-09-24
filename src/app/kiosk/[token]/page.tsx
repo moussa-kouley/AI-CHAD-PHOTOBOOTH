@@ -12,7 +12,8 @@ import { BRAND } from "@/lib/brand";
 import { keepScreenAwake, pulse, goBright } from "@/lib/feel";
 import { snapPortrait } from "@/lib/snap";
 import { useBoothLens } from "@/lib/use-booth-lens";
-import { cameraConstraints } from "@/lib/camera";
+import { canUseCamera, openUserMedia } from "@/lib/camera";
+import { FgiPoster } from "@/components/fgi-poster";
 import { attractCovers } from "@/lib/theme-look";
 import { EVENT_PUBLIC_TOKEN, eventGuestBooth, eventGuestPrompts, eventTemplateByLook } from "@/lib/fgi-agenda";
 import { readApiJson } from "@/lib/api-json";
@@ -55,7 +56,7 @@ function KioskDesk() {
   const streamRef = useRef<MediaStream | null>(null);
   const [booth, setBooth] = useState<Booth | null>(isEvent ? EVENT_BOOTH : null);
   const [prompts, setPrompts] = useState<Prompt[]>(isEvent ? EVENT_PROMPTS : []);
-  const [step, setStep] = useState<Step>(lookLocked ? "camera" : "attract");
+  const [step, setStep] = useState<Step>("attract");
   const [selected, setSelected] = useState<string[]>(eventLook ? [eventLook.look] : []);
   const [wantVideo, setWantVideo] = useState(false);
   const [email, setEmail] = useState("");
@@ -201,6 +202,11 @@ function KioskDesk() {
       lens.attach();
       return;
     }
+    if (!canUseCamera()) {
+      setCamDenied(true);
+      setCamReady(false);
+      return;
+    }
     let gone = false;
     setCamReady(false);
     const wait = window.setTimeout(() => {
@@ -208,8 +214,7 @@ function KioskDesk() {
       setCamDenied(true);
       setCamReady(false);
     }, 5500);
-    navigator.mediaDevices
-      .getUserMedia(cameraConstraints(facing))
+    void openUserMedia(facing)
       .then((stream) => {
         if (gone) {
           stream.getTracks().forEach((track) => track.stop());
@@ -383,41 +388,61 @@ function KioskDesk() {
     setStep("sending");
     const photo = await compressPortrait(source);
     const offlineId = crypto.randomUUID();
-    const form = new FormData();
-    form.set("boothToken", token);
-    form.set("promptIds", JSON.stringify(picks));
-    form.set("wantVideo", String(film));
-    form.set("consent", "true");
-    form.set("offlineId", offlineId);
-    if (email) form.set("email", email);
-    form.set("photo", photo, guestPhotoFilename(photo));
 
-    try {
-      const response = await fetch("/api/sessions", { method: "POST", body: form });
-      const data = await response.json();
-      if (!response.ok) {
-        if (response.status >= 500) throw new Error("weak-network");
-        setError(response.status === 402 ? copy.noLooks.fr : data.error || copy.boothStartFail.fr);
-        setStep(lookLocked ? "review" : "style");
-        return;
-      }
-      router.push(data.session.sharePath);
-    } catch {
-      await queueCapture({
-        id: offlineId,
-        boothToken: token,
-        promptId: picks[0],
-        promptIds: picks,
-        wantVideo: film,
-        consent: true,
-        email: email || undefined,
-        blob: photo,
-        createdAt: Date.now(),
-        attempts: 0,
-      });
-      setQueued((value) => value + 1);
-      setStep("queued");
+    function buildForm() {
+      const form = new FormData();
+      form.set("boothToken", token);
+      form.set("promptIds", JSON.stringify(picks));
+      form.set("wantVideo", String(film));
+      form.set("consent", "true");
+      form.set("offlineId", offlineId);
+      if (email) form.set("email", email);
+      form.set("photo", photo, guestPhotoFilename(photo));
+      return form;
     }
+
+    const tries = isEvent ? 3 : 1;
+    let lastMessage = copy.boothStartFail.fr;
+    for (let attempt = 0; attempt < tries; attempt += 1) {
+      try {
+        const response = await fetch("/api/sessions", { method: "POST", body: buildForm() });
+        const data = await readApiJson<{ session?: { sharePath?: string }; error?: string }>(response);
+        if (response.ok && data.session?.sharePath) {
+          router.push(data.session.sharePath);
+          return;
+        }
+        lastMessage = response.status === 402 ? copy.noLooks.fr : data.error || copy.boothStartFail.fr;
+        if (response.status < 500 || isEvent === false) {
+          setError(lastMessage);
+          setStep(lookLocked ? "review" : "style");
+          return;
+        }
+      } catch {
+        lastMessage = copy.boothStartFail.fr;
+      }
+      if (attempt < tries - 1) await new Promise((resolve) => window.setTimeout(resolve, 700 * (attempt + 1)));
+    }
+
+    if (isEvent || navigator.onLine) {
+      setError(lastMessage);
+      setStep(lookLocked ? "review" : "style");
+      return;
+    }
+
+    await queueCapture({
+      id: offlineId,
+      boothToken: token,
+      promptId: picks[0],
+      promptIds: picks,
+      wantVideo: film,
+      consent: true,
+      email: email || undefined,
+      blob: photo,
+      createdAt: Date.now(),
+      attempts: 0,
+    });
+    setQueued((value) => value + 1);
+    setStep("queued");
   }
 
   function resetShot() {
@@ -468,6 +493,13 @@ function KioskDesk() {
             )}
           </div>
           <div className="scene-veil" />
+          {eventLook ? (
+            <FgiPoster
+              photo={eventLook.guest}
+              position={eventLook.portrait}
+              className="look-fgi-poster"
+            />
+          ) : null}
           {operator ? (
             <a className="attract-atelier" href={booth?.id ? `/app/booths/${booth.id}` : "/app"}>
               <Pair en={copy.atelier.en} fr={copy.atelier.fr} />
@@ -482,22 +514,22 @@ function KioskDesk() {
                   <span>{BRAND.name}</span>
                 </div>
               </div>
-              <p className="eyebrow">{eventLook ? eventLook.topic : copy.attractHint.fr}</p>
+              <p className="eyebrow">{eventLook ? copy.lookPreview.fr : copy.attractHint.fr}</p>
               <h1 className="hero-title attract-title">{eventLook ? eventLook.title : title}</h1>
               <PathWhisper className="path-whisper-desk" />
               <p className="attract-line">
-                {eventLook ? "Votre visage reste. Ce monde du forum change autour de vous." : guestSubtitle(booth?.subtitle)}
+                {eventLook ? "Votre visage dans l’affiche FGI. Le lieu change autour de vous." : guestSubtitle(booth?.subtitle)}
               </p>
-              <p className="pair-fr attract-line-en">{copy.defaultSubtitle.en}</p>
+              <p className="pair-fr attract-line-en">{eventLook ? copy.lookPreview.en : copy.defaultSubtitle.en}</p>
               <div className="attract-cta">
                 <button className="btn btn-gold attract-door" type="button" disabled={loading} onClick={() => { void goBright(); setError(""); setCamDenied(false); setFromLibrary(false); setStep("camera"); }}>
-                  <Pair en={copy.hold.en} fr={copy.hold.fr} />
+                  <Pair en={copy.createMemories.en} fr={copy.createMemories.fr} />
                 </button>
                 {filePick("btn btn-ghost attract-door relative cursor-pointer overflow-hidden", <Pair en={copy.library.en} fr={copy.library.fr} />, loading)}
               </div>
               {eventLook ? (
                 <a className="attract-change" href="/#mondes">
-                  Changer de monde
+                  {copy.changeLook.fr}
                 </a>
               ) : null}
             </div>

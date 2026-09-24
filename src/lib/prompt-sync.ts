@@ -1,14 +1,23 @@
 import { prisma } from "./db";
+import { isPrismaConnectable } from "./db-ready";
+import { logger } from "./logger";
 import { PROMPT_RENAMES, SYSTEM_PROMPTS } from "./prompts";
 
 export async function ensureSystemPromptsIfEmpty() {
-  const count = await prisma.prompt.count({ where: { scope: "system" } });
-  if (count > 0) return;
-  await ensureSystemPrompts();
+  if (!isPrismaConnectable()) return;
+  try {
+    const count = await prisma.prompt.count({ where: { scope: "system" } });
+    if (count > 0) return;
+    await ensureSystemPrompts();
+  } catch (error) {
+    logger.warn({ error }, "Prompt sync skipped");
+  }
 }
 
 export async function ensureSystemPrompts() {
-  const existing = await prisma.prompt.findMany({ where: { scope: "system" } });
+  if (!isPrismaConnectable()) return;
+  try {
+    const existing = await prisma.prompt.findMany({ where: { scope: "system" } });
   const byTitle = new Map(existing.map((prompt) => [prompt.title, prompt]));
 
   for (const [oldTitle, nextTitle] of Object.entries(PROMPT_RENAMES)) {
@@ -45,6 +54,9 @@ export async function ensureSystemPrompts() {
   await offerHorizonLooks();
   await offerAtelierLooks();
   await offerXrLooks();
+  } catch (error) {
+    logger.warn({ error }, "Prompt sync skipped");
+  }
 }
 
 async function offerHorizonLooks() {

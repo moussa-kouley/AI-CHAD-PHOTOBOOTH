@@ -6,7 +6,7 @@ import { keepScreenAwake, pulse } from "@/lib/feel";
 import { iceConfig, openLensEvents, postLens, postLensShot, type LensPacket } from "@/lib/lens-client";
 import { snapPortrait } from "@/lib/snap";
 import { Pair, copy } from "@/lib/kiosk-copy";
-import { cameraConstraints } from "@/lib/camera";
+import { canUseCamera, openUserMedia } from "@/lib/camera";
 
 export default function LensPage() {
   const { token } = useParams<{ token: string }>();
@@ -36,7 +36,7 @@ export default function LensPage() {
 
     async function openCamera(next: "user" | "environment") {
       streamRef.current?.getTracks().forEach((track) => track.stop());
-      const stream = await navigator.mediaDevices.getUserMedia(cameraConstraints(next));
+      const stream = await openUserMedia(next);
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -190,8 +190,7 @@ export default function LensPage() {
               onClick={() => {
                 const next = facing === "user" ? "environment" : "user";
                 setFacing(next);
-                navigator.mediaDevices
-                  .getUserMedia(cameraConstraints(next))
+                void openUserMedia(next)
                   .then(async (stream) => {
                     streamRef.current?.getTracks().forEach((track) => track.stop());
                     streamRef.current = stream;

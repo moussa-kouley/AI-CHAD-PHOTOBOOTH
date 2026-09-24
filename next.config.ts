@@ -1,10 +1,21 @@
 import type { NextConfig } from "next";
+import os from "os";
+
+function lanDevOrigins() {
+  const hosts = new Set(["127.0.0.1", "localhost", "192.168.1.184", "192.168.1.216"]);
+  for (const addrs of Object.values(os.networkInterfaces())) {
+    for (const addr of addrs || []) {
+      if ((addr.family === "IPv4" || addr.family === 4) && !addr.internal) hosts.add(addr.address);
+    }
+  }
+  return [...hosts];
+}
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   outputFileTracingRoot: process.cwd(),
-  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.1.216"],
+  allowedDevOrigins: lanDevOrigins(),
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.aliyuncs.com" },

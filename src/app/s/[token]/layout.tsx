@@ -1,33 +1,41 @@
 import type { Metadata } from "next";
-import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { BRAND } from "@/lib/brand";
 import { copy } from "@/lib/kiosk-copy";
+import { readEventSession } from "@/lib/event-guest";
 
 type Props = { params: Promise<{ token: string }> };
 
+function abs(path: string) {
+  return `${env.APP_URL.replace(/\/$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
-  const session = await prisma.session.findUnique({
-    where: { shareToken: token },
-    include: { generations: true },
-  });
-  const photo = session?.generations.find((item) => item.kind === "photo" && (item.brandedPath || item.outputPath));
-  const still = photo?.brandedPath || photo?.outputPath;
-  const image = still ? `${env.APP_URL.replace(/\/$/, "")}/api/media/${still}` : undefined;
-  const title = photo?.promptTitle || copy.entering.fr;
+  let title = copy.entering.fr;
+  let image: string | undefined;
+
+  const local = await readEventSession(token);
+  if (local) {
+    const photo = local.generations.find((item) => item.kind === "photo" && (item.brandedPath || item.outputPath));
+    const still = photo?.brandedPath || photo?.outputPath;
+    image = still ? abs(`/api/media/${still}`) : undefined;
+    title = photo?.promptTitle || title;
+  }
+
   const description = copy.defaultSubtitle.fr;
+  const url = abs(`/s/${token}`);
   return {
     title,
     description,
-    alternates: { canonical: `${env.APP_URL.replace(/\/$/, "")}/s/${token}` },
+    alternates: { canonical: url },
     openGraph: {
       title,
       description,
       locale: "fr_TD",
       type: "website",
       siteName: BRAND.fr,
-      url: `${env.APP_URL.replace(/\/$/, "")}/s/${token}`,
+      url,
       images: image ? [{ url: image, width: 1080, height: 1350, type: "image/jpeg", alt: title }] : [],
     },
     twitter: {

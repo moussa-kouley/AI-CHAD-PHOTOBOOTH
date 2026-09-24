@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { attractCovers } from "@/lib/theme-look";
+import { FgiPoster } from "@/components/fgi-poster";
+import { EVENT_TEMPLATES } from "@/lib/fgi-agenda";
 
-const covers = attractCovers();
 const CYCLE_MS = 5200;
 
 export function HomeLiveStill() {
@@ -14,33 +14,23 @@ export function HomeLiveStill() {
     return () => window.clearInterval(id);
   }, []);
 
-  const count = Math.max(covers.length, 1);
+  const count = EVENT_TEMPLATES.length;
   const index = tick % count;
-  const featured = covers[index];
-  const world = featured?.[0] || "IA";
-  const hint = featured?.[1].hint || world;
+  const featured = EVENT_TEMPLATES[index];
 
   return (
     <figure className="home-live-still" suppressHydrationWarning>
-      <div className="home-still-frame">
-        {covers.map(([title, look], coverIndex) =>
-          look.cover ? (
-            <img
-              key={title}
-              src={look.cover}
-              alt=""
-              className="attract-still"
-              data-on={coverIndex === index ? "true" : undefined}
-              loading={coverIndex < 2 ? "eager" : "lazy"}
-              decoding="async"
-            />
-          ) : null,
-        )}
-        <span className="home-progress" key={tick} aria-hidden="true" />
-      </div>
+      {EVENT_TEMPLATES.map((item, coverIndex) => (
+        <FgiPoster
+          key={item.slug}
+          photo={item.guest}
+          position={item.portrait}
+          className={coverIndex === index ? "home-fgi-live is-on" : "home-fgi-live"}
+        />
+      ))}
       <figcaption className="home-caption">
-        <b>{world}</b>
-        <span>{hint}</span>
+        <b>{featured.title}</b>
+        <span>Affiche FGI · {featured.topic}</span>
         <small>
           {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
         </small>

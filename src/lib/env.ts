@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const schema = z.object({
-  DATABASE_URL: z.string().min(1),
+  DATABASE_URL: z.string().optional().default(""),
   DIRECT_URL: z.string().min(1).optional(),
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().optional().default(""),
@@ -37,9 +37,7 @@ function loadEnv(): Env {
   const building = isProductionBuild();
 
   return schema.parse({
-    DATABASE_URL:
-      databaseUrl ||
-      (building ? "postgresql://build:build@127.0.0.1:5432/build" : databaseUrl),
+    DATABASE_URL: databaseUrl || (building ? "postgresql://build:build@127.0.0.1:5432/build" : ""),
     DIRECT_URL: blank(process.env.DIRECT_URL) || databaseUrl,
     NEXT_PUBLIC_SUPABASE_URL: blank(process.env.NEXT_PUBLIC_SUPABASE_URL),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: blank(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY),

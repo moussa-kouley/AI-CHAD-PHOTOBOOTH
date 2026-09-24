@@ -121,6 +121,9 @@ export const copy = {
   boothStartFail: { en: "The booth could not start.", fr: "Le booth n’a pas pu démarrer." },
   defaultSubtitle: { en: "Your face. Another world.", fr: "Votre visage. Un autre lieu." },
   attractHint: { en: "Internet Governance Forum · N’Djamena", fr: "Forum sur la gouvernance de l’Internet · N’Djamena" },
+  createMemories: { en: "Create memories", fr: "Créer un souvenir" },
+  lookPreview: { en: "This is the finished FGI poster.", fr: "Voici l’affiche finale." },
+  changeLook: { en: "Choose another look", fr: "Choisir un autre modèle" },
 };
 
 export function catFr(name: string) {

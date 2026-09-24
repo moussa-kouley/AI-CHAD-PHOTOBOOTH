@@ -63,6 +63,14 @@ function FrameSheet({
     );
   }
 
+  if (frame.id === "poster") {
+    return (
+      <span className="sheet sheet-poster">
+        <img src="/brand/fgi-poster.jpg" alt="" />
+      </span>
+    );
+  }
+
   if (frame.id === "held") {
     return (
       <span className={`sheet sheet-salon${logo ? " sheet-has-mark" : ""}`} style={{ "--gold": gold } as CSSProperties}>

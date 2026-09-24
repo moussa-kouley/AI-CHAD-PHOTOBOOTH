@@ -5,7 +5,7 @@ export const brandSchema = z.object({
   frame: z.preprocess((value) => {
     const raw = String(value || "strip");
     return FRAME_ALIASES[raw] || raw;
-  }, z.enum(["strip", "sparkle", "brand", "instant", "held"])).default("strip"),
+  }, z.enum(["strip", "sparkle", "brand", "instant", "held", "poster"])).default("strip"),
   eventName: z.string().max(80).optional().default(""),
   subtitle: z.string().max(80).optional().default(""),
   signature: z.string().max(60).optional().default(""),

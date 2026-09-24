@@ -3,6 +3,7 @@ import { mkdir, writeFile, readFile } from "fs/promises";
 import path from "path";
 import { AppError } from "./errors";
 import { apiCopy } from "./studio-copy";
+import { logger } from "./logger";
 import { preserveGuestUpload } from "./guest-still";
 import { mediaBucket, supabaseAdmin } from "./supabase-admin";
 
@@ -19,14 +20,22 @@ function mimeForExt(ext: string) {
 }
 
 async function putCloud(relative: string, buffer: Buffer, mime: string) {
-  const supabase = supabaseAdmin();
-  if (!supabase) return false;
-  const { error } = await supabase.storage.from(mediaBucket()).upload(relative, buffer, {
-    contentType: mime,
-    upsert: true,
-  });
-  if (error) throw new AppError(500, error.message, "STORAGE");
-  return true;
+  try {
+    const supabase = supabaseAdmin();
+    if (!supabase) return false;
+    const { error } = await supabase.storage.from(mediaBucket()).upload(relative, buffer, {
+      contentType: mime,
+      upsert: true,
+    });
+    if (error) {
+      logger.warn({ relative, message: error.message }, "Cloud upload skipped, using local storage");
+      return false;
+    }
+    return true;
+  } catch (error) {
+    logger.warn({ relative, error }, "Cloud upload skipped, using local storage");
+    return false;
+  }
 }
 
 async function getCloud(relative: string) {
@@ -35,6 +44,14 @@ async function getCloud(relative: string) {
   const { data, error } = await supabase.storage.from(mediaBucket()).download(relative);
   if (error || !data) return null;
   return Buffer.from(await data.arrayBuffer());
+}
+
+async function persistFile(relative: string, buffer: Buffer, mime: string) {
+  const full = resolveStored(relative);
+  await mkdir(path.dirname(full), { recursive: true });
+  await writeFile(full, buffer);
+  void putCloud(relative, buffer, mime);
+  return full;
 }
 
 export async function saveUpload(file: File, folder: "uploads" | "outputs") {
@@ -50,30 +67,16 @@ export async function saveUpload(file: File, folder: "uploads" | "outputs") {
   const ext = kept.mime === "image/png" ? "png" : kept.mime === "image/webp" ? "webp" : "jpg";
   const name = `${randomUUID()}.${ext}`;
   const relative = `${folder}/${name}`;
-  const cloud = await putCloud(relative, kept.buffer, kept.mime);
-  if (!cloud) {
-    const dir = path.join(root, folder);
-    await mkdir(dir, { recursive: true });
-    const full = path.join(dir, name);
-    await writeFile(full, kept.buffer);
-    return { relative, full, mime: kept.mime, bytes: kept.buffer.length };
-  }
-  return { relative, full: relative, mime: kept.mime, bytes: kept.buffer.length };
+  const full = await persistFile(relative, kept.buffer, kept.mime);
+  return { relative, full, mime: kept.mime, bytes: kept.buffer.length };
 }
 
 export async function saveBuffer(buffer: Buffer, folder: "uploads" | "outputs", ext: "png" | "jpg" | "webp" | "mp4") {
   const name = `${randomUUID()}.${ext}`;
   const relative = `${folder}/${name}`;
   const mime = mimeForExt(ext);
-  const cloud = await putCloud(relative, buffer, mime);
-  if (!cloud) {
-    const dir = path.join(root, folder);
-    await mkdir(dir, { recursive: true });
-    const full = path.join(dir, name);
-    await writeFile(full, buffer);
-    return { relative, full };
-  }
-  return { relative, full: relative };
+  const full = await persistFile(relative, buffer, mime);
+  return { relative, full };
 }
 
 export function resolveStored(relative: string) {
@@ -84,9 +87,13 @@ export function resolveStored(relative: string) {
 }
 
 export async function readStored(relative: string) {
-  const cloud = await getCloud(relative);
-  if (cloud) return cloud;
-  return readFile(resolveStored(relative));
+  try {
+    return await readFile(resolveStored(relative));
+  } catch {
+    const cloud = await getCloud(relative);
+    if (cloud) return cloud;
+    throw new AppError(404, apiCopy.badPath, "MISSING_FILE");
+  }
 }
 
 export async function storedDataUrl(relative: string) {

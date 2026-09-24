@@ -1,26 +1,16 @@
 import { prisma } from "@/lib/db";
 import { EVENT_PUBLIC_TOKEN, eventLookTitles } from "@/lib/fgi-agenda";
-import { ensureSystemPrompts } from "@/lib/prompt-sync";
 
 const SLUG = "fgi-tchad-2026";
 
-async function eventPromptIds() {
-  await ensureSystemPrompts();
-  const looks = eventLookTitles();
-  const prompts = await prisma.prompt.findMany({
-    where: { scope: "system", title: { in: looks } },
-    select: { id: true },
-  });
-  return prompts.map((item) => item.id);
-}
-
 export async function ensureEventBooth() {
-  const selectedPrompts = JSON.stringify(await eventPromptIds());
+  const selectedPrompts = JSON.stringify(eventLookTitles());
   const live = {
     publicToken: EVENT_PUBLIC_TOKEN,
     isActive: true,
     promptMode: "user_chooses" as const,
     selectedPrompts,
+    videoEnabled: false,
   };
 
   const existing = await prisma.photobooth.findUnique({ where: { publicToken: EVENT_PUBLIC_TOKEN } });
@@ -64,7 +54,7 @@ export async function ensureEventBooth() {
       selectedPrompts,
       videoEnabled: false,
       brand: JSON.stringify({
-        frame: "strip",
+        frame: "poster",
         eventName: "FGI Tchad",
         subtitle: "10e édition · N’Djamena",
         primary: "#FECB00",

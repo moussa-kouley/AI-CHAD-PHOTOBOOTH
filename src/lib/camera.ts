@@ -1,3 +1,7 @@
+export function canUseCamera() {
+  return typeof navigator !== "undefined" && typeof navigator.mediaDevices?.getUserMedia === "function";
+}
+
 export function cameraConstraints(facing: "user" | "environment"): MediaStreamConstraints {
   return {
     audio: false,
@@ -8,4 +12,11 @@ export function cameraConstraints(facing: "user" | "environment"): MediaStreamCo
       frameRate: { ideal: 30 },
     },
   };
+}
+
+export async function openUserMedia(facing: "user" | "environment") {
+  if (!canUseCamera()) {
+    throw new Error("camera-unavailable");
+  }
+  return navigator.mediaDevices.getUserMedia(cameraConstraints(facing));
 }

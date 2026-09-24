@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { FgiPoster } from "@/components/fgi-poster";
 import { HomeLiveStill } from "@/components/home-live-still";
 import { EVENT_PUBLIC_TOKEN, EVENT_TEMPLATES, FGI_DAY1_MODERATOR, FGI_OPENING, FGI_PANELS, FGI_WORKSHOPS } from "@/lib/fgi-agenda";
 
@@ -106,11 +107,11 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="home-lead">
-            Choisissez un monde du forum. Votre visage reste. Le réseau change : IA, cyber, école, fibre, santé.
+            Choisissez un modèle. Votre visage reste. L’affiche FGI encadre le cliché.
           </p>
           <div className="home-cta">
             <a className="btn btn-gold" href="#mondes">
-              Choisir un monde
+              Créer un souvenir
             </a>
             <a className="btn btn-ghost" href="#agenda">
               Voir l’agenda
@@ -122,21 +123,19 @@ export default function HomePage() {
 
       <section className="home-block home-mondes" id="mondes">
         <header className="home-head">
-          <p className="eyebrow">Booth FGI</p>
-          <h2>Choisissez votre monde.</h2>
+          <p className="eyebrow">Modèles</p>
+          <h2>Choisissez un modèle.</h2>
         </header>
         <ul className="home-shots">
           {EVENT_TEMPLATES.map((item) => (
             <li key={item.slug}>
               <Link className="home-shot-link" href={`/kiosk/${EVENT_PUBLIC_TOKEN}?look=${encodeURIComponent(item.look)}`}>
-                <div className="home-shot">
-                  <img src={item.cover} alt="" />
-                  <p className="home-caption">
-                    <b>{item.title}</b>
-                    <span>{item.topic}</span>
-                    <small>Photographier</small>
-                  </p>
-                </div>
+                <FgiPoster photo={item.guest} position={item.portrait} className="home-fgi-poster" />
+                <p className="home-caption">
+                  <b>{item.title}</b>
+                  <span>{item.topic}</span>
+                  <small>Créer un souvenir</small>
+                </p>
               </Link>
             </li>
           ))}
@@ -220,11 +219,11 @@ export default function HomePage() {
           <img src="/brand/fgi-tchad.png" alt="FGI Tchad" />
           <img src="/brand/igf.webp" alt="Internet Governance Forum" className="home-igf" />
         </div>
-        <h2>Entrer dans le booth FGI.</h2>
-        <p>10e édition. Choisissez un thème, prenez la photo. Pas de compte.</p>
+        <h2>Créer un souvenir.</h2>
+        <p>Choisissez un modèle, prenez la photo. Pas de compte.</p>
         <div className="home-cta">
           <a className="btn btn-gold" href="#mondes">
-            Choisir un monde
+            Créer un souvenir
           </a>
           <a className="btn btn-ghost" href="#agenda">
             Agenda
