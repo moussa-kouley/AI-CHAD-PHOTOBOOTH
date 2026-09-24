@@ -3,10 +3,15 @@ import os from "os";
 
 function lanDevOrigins() {
   const hosts = new Set(["127.0.0.1", "localhost", "192.168.1.184", "192.168.1.216"]);
-  for (const addrs of Object.values(os.networkInterfaces())) {
-    for (const addr of addrs || []) {
-      if ((addr.family === "IPv4" || addr.family === 4) && !addr.internal) hosts.add(addr.address);
+  try {
+    for (const addrs of Object.values(os.networkInterfaces())) {
+      for (const addr of addrs || []) {
+        const family = String(addr.family);
+        if ((family === "IPv4" || family === "4") && !addr.internal) hosts.add(addr.address);
+      }
     }
+  } catch {
+    /* os.networkInterfaces() is unavailable in some build sandboxes */
   }
   return [...hosts];
 }
