@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { BootScreen } from "@/components/boot-screen";
 import QRCode from "qrcode";
 import { compressPortrait, flushQueue, guestPhotoFilename, listQueue, queueCapture } from "@/lib/offline-queue";
@@ -501,9 +502,9 @@ function KioskDesk() {
             />
           ) : null}
           {operator ? (
-            <a className="attract-atelier" href={booth?.id ? `/app/booths/${booth.id}` : "/app"}>
+            <Link className="attract-atelier" href={booth?.id ? `/app/booths/${booth.id}` : "/app"}>
               <Pair en={copy.atelier.en} fr={copy.atelier.fr} />
-            </a>
+            </Link>
           ) : null}
           <div className="attract-copy">
             <div className="attract-desk">
@@ -528,9 +529,9 @@ function KioskDesk() {
                 {filePick("btn btn-ghost attract-door relative cursor-pointer overflow-hidden", <Pair en={copy.library.en} fr={copy.library.fr} />, loading)}
               </div>
               {eventLook ? (
-                <a className="attract-change" href="/#mondes">
+                <Link className="attract-change" href="/#mondes">
                   {copy.changeLook.fr}
-                </a>
+                </Link>
               ) : null}
             </div>
           </div>
